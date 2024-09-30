@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "rm-result" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "rm-result" ''
   main() {
     if [[ $# -eq 0 ]]; then
       if [[ -L ./result ]]; then

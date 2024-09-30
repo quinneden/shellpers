@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "cop" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "cop" ''
   parse_args() {
     if [[ $# -eq 0 ]]; then
       args=("--help"); export args
@@ -24,4 +25,4 @@
     gh_copilot "''${args[@]}"
   }
   main "''${@}"; exit
-'';
+''

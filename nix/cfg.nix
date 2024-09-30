@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   cfg = pkgs.writeShellScriptBin "cfg" ''
     dotdir="$HOME"/.dotfiles
 

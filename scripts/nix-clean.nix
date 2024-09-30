@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "nix-clean" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "nix-clean" ''
   message_loop() {
     while [[ $BREAK == 0 ]]; do
       printf "\rCollecting garbage from nix store.  "; sleep 0.7

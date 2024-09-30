@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "cfg" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "cfg" ''
   dotdir="$HOME"/.dotfiles
   set_edit() {
     if [[ $1 == '-c' ]]; then
@@ -42,4 +43,4 @@
     # echo "$HEADFILE"
   }
   main "$@" && exit
-'';
+''

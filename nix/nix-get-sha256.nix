@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   nix-get-sha256 = pkgs.writeShellScriptBin "nix-get-sha256" ''
     URL="$1"
     nix-prefetch-url --unpack "$URL" 2>/dev/null | read -r PREFETCH_URL

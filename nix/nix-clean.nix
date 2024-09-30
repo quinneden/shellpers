@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   nix-clean = pkgs.writeShellScriptBin "nix-clean" ''
     message_loop() {
       while [[ $BREAK == 0 ]]; do

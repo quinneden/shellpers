@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "sec" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "sec" ''
   KEYCHAIN="secrets.keychain"
   main() {
     if [[ -z "$1" ]]; then

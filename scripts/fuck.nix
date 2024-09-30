@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "fuck" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "fuck" ''
   parse_args() {
     for f in "''${@}"; do
       if [[ -L $f ]]; then

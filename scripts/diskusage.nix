@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "diskusage" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "diskusage" ''
   ncdu_root() {
     test_file=$(ncdu -f /tmp/ncdu_root.json -o- &>/dev/null && echo OK)
     if [[ -e /tmp/ncdu_root.json ]]; then
@@ -68,4 +69,4 @@
     esac
   }
   main "$@" || exit 1
-'';
+''

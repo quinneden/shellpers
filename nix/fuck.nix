@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   fuck = pkgs.writeShellScriptBin "fuck" ''
     parse_args() {
       for f in "''${@}"; do

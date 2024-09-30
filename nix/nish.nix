@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   nish = pkgs.writeShellScriptBin "nish" ''
     parse_args() {
       if [[ $# -ge 1 ]]; then

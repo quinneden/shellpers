@@ -1,4 +1,8 @@
-{pkgs, stdenv, ...}: let
+{
+  pkgs,
+  stdenv,
+  ...
+}: let
   mi = pkgs.writeShellScriptBin "mi" ''
     if [[ $TERM_PROGRAM == "iTerm.app" ]]; then
       micro "$@"
@@ -8,7 +12,6 @@
       echo -ne '\e[2 q'
     fi
   '';
-in
 in
   stdenv.mkDerivation rec {
     name = "mi";

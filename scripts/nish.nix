@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "nish" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "nish" ''
   parse_args() {
     if [[ $# -ge 1 ]]; then
       if [[ $1 =~ -.$ ]]; then

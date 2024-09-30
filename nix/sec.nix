@@ -1,4 +1,9 @@
-{pkgs, lib, stdenv, ...}: let
+{
+  pkgs,
+  lib,
+  stdenv,
+  ...
+}: let
   sec = pkgs.writeShellScriptBin "sec" ''
     KEYCHAIN="secrets.keychain"
 
