@@ -40,8 +40,8 @@ pkgs.writeShellScriptBin "fuck" ''
     local files=()
     local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
     if [[ $(uname) == "Linux" ]]; then
-      local trash_cmd="${pkgs.gtrash}/bin/gtrash put"
-      local trash_empty_cmd="${pkgs.gtrash}/bin/gtrash rm -f"
+      local trash_cmd=("sudo" "${pkgs.gtrash}/bin/gtrash" "put")
+      local trash_empty_cmd=("sudo" "${pkgs.gtrash}/bin/gtrash" "rm" "-f")
     else
       local trash_cmd="trash"
       local trash_empty_cmd="trash -ey"
