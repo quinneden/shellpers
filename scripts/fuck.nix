@@ -22,7 +22,7 @@ pkgs.writeShellScriptBin "fuck" ''
   }
   trash_files() {
     if [[ -n ''${files} ]]; then
-      eval $trash_cmd "''${files[@]}"
+      sudo $trash_cmd "''${files[@]}"
     fi
     if [[ $? -eq 0 ]]; then
       local LIST_DEL=$(for f in "''${files[@]}"; do printf "  $(basename $f)\n"; done)
@@ -31,17 +31,17 @@ pkgs.writeShellScriptBin "fuck" ''
   }
   empty_trash() {
     if [[ $EMPTY_NOW -eq 1 ]]; then
-      $trash_empty_cmd "''${files[@]}" &>/dev/null
+      sudo $trash_empty_cmd "''${files[@]}" &>/dev/null
     else
-      ((sleep 60 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
+      ((sleep 60 && sudo $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
     fi
   }
   main() {
     local files=()
     local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
     if [[ $(uname) == "Linux" ]]; then
-      local trash_cmd=("sudo" "${pkgs.gtrash}/bin/gtrash" "put")
-      local trash_empty_cmd=("sudo" "${pkgs.gtrash}/bin/gtrash" "rm" "-f")
+      local trash_cmd="${pkgs.gtrash}/bin/gtrash put"
+      local trash_empty_cmd="${pkgs.gtrash}/bin/gtrash rm -f"
     else
       local trash_cmd="trash"
       local trash_empty_cmd="trash -ey"
