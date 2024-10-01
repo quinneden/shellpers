@@ -13,7 +13,9 @@ else
 fi
 
 if [[ -d $result ]]; then
-  sudo cp "$result"/* "$prefix"
+  for i in "$result"/bin/*; do
+    sudo cp "$i" "$prefix/$(basename $i)"
+  done
 else
   echo "error: nothing to install"
   exit 1
