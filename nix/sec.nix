@@ -65,7 +65,7 @@ in
     src = ./.;
     buildInputs = [sec];
     installPhase = ''
-      mkdir -p $out
-      cp ${sec}/bin/* $out
+      mkdir -p $out/bin
+      cp ${sec}/bin/* $out/bin
     '';
   }

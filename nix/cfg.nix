@@ -78,7 +78,7 @@ in
     src = ./.;
     buildInputs = [cfg];
     installPhase = ''
-      mkdir -p $out
-      cp ${cfg}/bin/* $out
+      mkdir -p $out/bin
+      cp ${cfg}/bin/* $out/bin
     '';
   }

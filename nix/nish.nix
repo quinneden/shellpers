@@ -54,7 +54,7 @@ in
     src = ./.;
     buildInputs = [nish];
     installPhase = ''
-      mkdir -p $out
-      cp ${nish}/bin/* $out
+      mkdir -p $out/bin
+      cp ${nish}/bin/* $out/bin
     '';
   }

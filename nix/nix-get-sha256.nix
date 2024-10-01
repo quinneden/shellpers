@@ -16,7 +16,7 @@ in
     src = ./.;
     buildInputs = [nix-get-sha256];
     installPhase = ''
-      mkdir -p $out
-      cp ${nix-get-sha256}/bin/* $out
+      mkdir -p $out/bin
+      cp ${nix-get-sha256}/bin/* $out/bin
     '';
   }

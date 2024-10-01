@@ -42,7 +42,7 @@ in
     src = ./.;
     buildInputs = [rm-result];
     installPhase = ''
-      mkdir -p $out
-      cp ${rm-result}/bin/* $out
+      mkdir -p $out/bin
+      cp ${rm-result}/bin/* $out/bin
     '';
   }

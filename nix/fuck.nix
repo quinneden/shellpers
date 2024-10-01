@@ -75,7 +75,7 @@ in
     src = ./.;
     buildInputs = [fuck];
     installPhase = ''
-      mkdir -p $out
-      cp ${fuck}/bin/* $out
+      mkdir -p $out/bin
+      cp ${fuck}/bin/* $out/bin
     '';
   }

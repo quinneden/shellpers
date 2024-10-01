@@ -39,7 +39,7 @@ in
     src = ./.;
     buildInputs = [nix-clean];
     installPhase = ''
-      mkdir -p $out
-      cp ${nix-clean}/bin/* $out
+      mkdir -p $out/bin
+      cp ${nix-clean}/bin/* $out/bin
     '';
   }

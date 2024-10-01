@@ -39,7 +39,7 @@ in
     src = ./.;
     buildInputs = [cop];
     installPhase = ''
-      mkdir -p $out
-      cp ${cop}/bin/* $out
+      mkdir -p $out/bin
+      cp ${cop}/bin/* $out/bin
     '';
   }

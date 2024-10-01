@@ -87,7 +87,7 @@ in
     src = ./.;
     buildInputs = [diskusage];
     installPhase = ''
-      mkdir -p $out
-      cp ${diskusage}/bin/* $out
+      mkdir -p $out/bin
+      cp ${diskusage}/bin/* $out/bin
     '';
   }
