@@ -9,6 +9,7 @@
   cop = pkgs.callPackage scripts/cop.nix {};
   diskusage = pkgs.callPackage scripts/diskusage.nix {};
   fuck = pkgs.callPackage scripts/fuck.nix {};
+  mi = pkgs.callPackage scripts/mi.nix {};
   nish = pkgs.callPackage scripts/nish.nix {};
   nix-clean = pkgs.callPackage scripts/nix-clean.nix {};
   nix-get-sha256 = pkgs.callPackage scripts/nix-get-sha256.nix {};
@@ -18,7 +19,7 @@ in
   stdenv.mkDerivation rec {
     name = "allScripts";
     src = ./scripts;
-    buildInputs = [cfg cop diskusage fuck nish nix-clean nix-get-sha256 rm-result sec];
+    buildInputs = [cfg cop diskusage fuck mi nish nix-clean nix-get-sha256 rm-result sec];
     installPhase = ''
       mkdir -p $out/bin
       ln -s ${cfg}/bin/* $out/bin
