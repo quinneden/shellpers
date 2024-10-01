@@ -25,6 +25,7 @@ in
       ln -s ${cop}/bin/* $out/bin
       ln -s ${diskusage}/bin/* $out/bin
       ln -s ${fuck}/bin/* $out/bin
+      ln -s ${mi}/bin/* $out/bin
       ln -s ${nish}/bin/* $out/bin
       ln -s ${nix-clean}/bin/* $out/bin
       ln -s ${nix-get-sha256}/bin/* $out/bin
