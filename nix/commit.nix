@@ -2,7 +2,7 @@
 commit = pkgs.writeShellScriptBin "commit" ''
   confirm() {
     while true; do
-      read -sr -n 1 -p "''${1:-Continue?}" REPLY
+      read -sr -n 1 -p "$1" REPLY
       case $REPLY in
         [yY]) echo ; return 0 ;;
         [$'\x0A']) echo ; return 0 ;;
@@ -25,7 +25,7 @@ commit = pkgs.writeShellScriptBin "commit" ''
   | sed -re 's/^C:$/Copied: /' \
   | sed -re 's/^D:$/Deleted: /' \
   | sed -re 's/^T:$/File Type Changed: /' \
-  | tr '\n' ' ' | xargs
+  | tr '\n' ' ' | xargs \
   > $TMPFILE
 
   cat $TMPFILE
