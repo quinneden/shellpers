@@ -11,7 +11,7 @@
       ${pkgs.micro}/bin/micro "$@"
       echo -ne '\e[2 q'
     else
-      ${pkgs.micro}/bin/micro "$@"
+      micro "$@"
     fi
   '';
 in
