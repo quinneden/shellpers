@@ -2,10 +2,9 @@
 commit = pkgs.writeShellScriptBin "commit" ''
   confirm() {
     while true; do
-      read -sr -n 1 -p "$1" REPLY
+      read -sr -n 1 -p 'Commit with this message? [y\n]' REPLY
       case $REPLY in
         [yY]) echo ; return 0 ;;
-        [$'\x0A']) echo ; return 0 ;;
         [nN]) echo ; return 1 ;;
         *) printf " \033[31m %s \n\033[0m" "invalid input"
       esac
@@ -30,9 +29,9 @@ commit = pkgs.writeShellScriptBin "commit" ''
 
   cat $TMPFILE
 
-  confirm 'Commit with this message? [y\n]' || exit 1
-
-  git commit -F $TMPFILE
+  if confirm; then
+    git commit -F $TMPFILE
+  fi
 
   rm -f $TMPFILE
 '';
