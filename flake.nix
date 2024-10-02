@@ -18,6 +18,7 @@
         packages = rec {
           default = pkgs.callPackage ./default.nix {inherit self;};
           cfg = pkgs.callPackage nix/cfg.nix {inherit pkgs;};
+          commit = pkgs.callPackage nix/commit.nix {inherit pkgs;};
           cop = pkgs.callPackage nix/cop.nix {inherit pkgs;};
           diskusage = pkgs.callPackage nix/diskusage.nix {inherit pkgs;};
           fuck = pkgs.callPackage nix/fuck.nix {inherit pkgs;};

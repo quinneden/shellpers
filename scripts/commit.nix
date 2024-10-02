@@ -14,7 +14,7 @@
   REPONAME=$(basename $PWD | tr -d '.')
   TMPFILE=$(mktemp /tmp/git-commit-msg-$REPONAME.XXXXX)
 
-  git status --porcelain | grep '^[MARCDT]' | sort
+  git status --porcelain | grep '^[MARCDT]' | sort \
   | sed -re 's/^([[:upper:]])[[:upper:]]?[[:space:]]+/\\1:\\n/' \
   | awk '!x[$0]++' \
   | sed -re 's/^([[:upper:]]:)$/\\n\\1/' \

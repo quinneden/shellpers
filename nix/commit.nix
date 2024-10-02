@@ -1,8 +1,8 @@
-{pkgs, ...}: let
+{pkgs, stdenv, ...}: let
 commit = pkgs.writeShellScriptBin "commit" ''
   confirm() {
     while true; do
-      read -sr -n 1 REPLY
+      read -sr -n 1 -p "''${1:-Continue?}" REPLY
       case $REPLY in
         [yY]) echo ; return 0 ;;
         [$'\x0A']) echo ; return 0 ;;
@@ -15,10 +15,10 @@ commit = pkgs.writeShellScriptBin "commit" ''
   REPONAME=$(basename $PWD | tr -d '.')
   TMPFILE=$(mktemp /tmp/git-commit-msg-$REPONAME.XXXXX)
 
-  git status --porcelain | grep '^[MARCDT]' | sort
-  | sed -re 's/^([[:upper:]])[[:upper:]]?[[:space:]]+/\\1:\\n/' \
+  git status --porcelain | grep '^[MARCDT]' | sort \
+  | sed -re 's/^([[:upper:]])[[:upper:]]?[[:space:]]+/\1:\n/' \
   | awk '!x[$0]++' \
-  | sed -re 's/^([[:upper:]]:)$/\\n\\1/' \
+  | sed -re 's/^([[:upper:]]:)$/\n\1/' \
   | sed -re 's/^M:$/Modified: /' \
   | sed -re 's/^A:$/Added: /' \
   | sed -re 's/^R:$/Renamed: /' \
