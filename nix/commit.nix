@@ -12,7 +12,7 @@ commit = pkgs.writeShellScriptBin "commit" ''
   }
 
   REPONAME=$(basename $PWD | tr -d '.')
-  TMPFILE=$(mktemp /tmp/git-commit-msg-$REPONAME.XXXXX)
+  TMPFILE=$(mktemp /tmp/commit-msg-$REPONAME.XXXXXXX)
 
   git status --porcelain | grep '^[MARCDT]' | sort \
   | sed -re 's/^([[:upper:]])[[:upper:]]?[[:space:]]+/\1:\n/' \
