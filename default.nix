@@ -18,7 +18,8 @@
   sec = pkgs.callPackage scripts/sec.nix {};
 in
   stdenv.mkDerivation rec {
-    name = "allScripts";
+    name = "util-scripts";
+    version = 0.1;
     src = ./scripts;
     buildInputs = [cfg commit cop diskusage fuck mi nish nix-clean nix-get-sha256 rm-result sec];
     installPhase = ''
