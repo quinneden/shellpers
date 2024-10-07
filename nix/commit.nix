@@ -129,7 +129,7 @@
       fi
     }
 
-    main || exit 1
+    main; rm -f $tmp $msg; exit
   '';
 in
   stdenv.mkDerivation rec {
