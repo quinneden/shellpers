@@ -110,12 +110,17 @@
     }
 
     main() {
-      git_status=$(git status --porcelain)
+      git_status=$(git status --porcelain --untracked-files=no)
       tmp=$(mktemp -p /tmp gitstat-json.XXXXXXXXXX)
       msg=$(mktemp -p /tmp git-commit-msg.XXXXXXXXX)
 
       (git_status_json | jq) > $tmp
-      parse_json 2>/dev/null
+
+      if [[ -n $git_status ]]; then
+        parse_json 2>/dev/null
+      else
+        echo 'Nothing to commit.' && exit 0
+      fi
 
       cat $msg
 
