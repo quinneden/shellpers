@@ -109,13 +109,13 @@
     tmp=$(mktemp -p /tmp gitstat-json.XXXXXXXXXX)
     msg=$(mktemp -p /tmp git-commit-msg.XXXXXXXXX)
 
-    (git_status_json | jq) > $tmp
-
     if [[ -n $git_status ]]; then
-      parse_json 2>/dev/null
+      (git_status_json | jq) > $tmp
     else
-      echo 'Nothing to commit.' && exit 0
+      echo 'Nothing to commit'; exit 0
     fi
+
+    parse_json 2>/dev/null
 
     cat $msg
 
