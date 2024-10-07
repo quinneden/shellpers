@@ -11,9 +11,13 @@
             pkgs+=("nixpkgs#$p")
           done
         else
-          for p in "''${@}"; do
-            pkgs+=("nixpkgs#$p")
-          done
+          if [[ $1 =~ "^github:.*$" || $1 =~  "^.+#.*$" ]]; then
+            pkgs="$1"
+          else
+            for p in "''${@}"; do
+              pkgs+=("nixpkgs#$p")
+            done
+          fi
         fi
         export pkgs
       fi
