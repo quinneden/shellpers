@@ -11,7 +11,7 @@
             pkgs+=("nixpkgs#$p")
           done
         else
-
+          if [[ $1 =~ ^.+#.+$ ]] || [[ $1 =~ ^github:.+$ ]]; then
             pkgs="$1"
           else
             for p in "''${@}"; do
@@ -32,6 +32,8 @@
           -p)
             nix-shell -p "''${@:2}" --run zsh
             return;;
+          .)
+            nix shell;;
           *)
             nix shell "''${pkgs[@]}"
         esac
