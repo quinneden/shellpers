@@ -7,7 +7,7 @@ pkgs.writeShellScriptBin "nish" ''
           pkgs+=("nixpkgs#$p")
         done
       else
-        if [[ $1 =~ "^github:.*$" || $1 =~  "^.+#.*$" ]]; then
+        if [[ $1 =~ ^.+#.+$ ]] || [[ $1 =~ ^github:.+$ ]]; then
           pkgs="$1"
         else
           for p in "''${@}"; do

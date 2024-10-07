@@ -11,7 +11,7 @@
             pkgs+=("nixpkgs#$p")
           done
         else
-          if [[ $1 =~ "^github:.*$" || $1 =~  "^.+#.*$" ]]; then
+
             pkgs="$1"
           else
             for p in "''${@}"; do
