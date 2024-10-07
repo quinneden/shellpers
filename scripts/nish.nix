@@ -28,6 +28,8 @@ pkgs.writeShellScriptBin "nish" ''
         -p)
           nix-shell -p "''${@:2}" --run zsh
           return;;
+        .)
+          nix shell;;
         *)
           nix shell "''${pkgs[@]}"
       esac
