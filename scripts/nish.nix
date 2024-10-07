@@ -7,13 +7,18 @@ pkgs.writeShellScriptBin "nish" ''
           pkgs+=("nixpkgs#$p")
         done
       else
-        for p in "''${@}"; do
-          pkgs+=("nixpkgs#$p")
-        done
+        if [[ $1 =~ "^github:.*$" || $1 =~  "^.+#.*$" ]]; then
+          pkgs="$1"
+        else
+          for p in "''${@}"; do
+            pkgs+=("nixpkgs#$p")
+          done
+        fi
       fi
       export pkgs
     fi
   }
+
   nix_shell() {
     if [[ $# -ge 1 ]]; then
       case $1 in
@@ -34,10 +39,12 @@ pkgs.writeShellScriptBin "nish" ''
       fi
     fi
   }
+
   nish_command() {
     pkgs=()
     parse_args "$@"
     nix_shell "$@"
   }
+
   nish_command "$@"; exit
 ''
