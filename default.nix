@@ -5,23 +5,22 @@
   system,
   ...
 }: let
-  cfg = pkgs.callPackage scripts/cfg.nix {};
-  commit = pkgs.callPackage scripts/commit.nix {};
-  cop = pkgs.callPackage scripts/cop.nix {};
-  diskusage = pkgs.callPackage scripts/diskusage.nix {};
-  fuck = pkgs.callPackage scripts/fuck.nix {};
-  mi = pkgs.callPackage scripts/mi.nix {};
-  nish = pkgs.callPackage scripts/nish.nix {};
-  nix-clean = pkgs.callPackage scripts/nix-clean.nix {};
-  nix-get-sha256 = pkgs.callPackage scripts/nix-get-sha256.nix {};
-  rm-result = pkgs.callPackage scripts/rm-result.nix {};
-  sec = pkgs.callPackage scripts/sec.nix {};
+  cfg = pkgs.callPackage ./nix/cfg {inherit pkgs;};
+  commit = pkgs.callPackage ./nix/commit {inherit pkgs;};
+  cop = pkgs.callPackage ./nix/cop {inherit pkgs;};
+  diskusage = pkgs.callPackage ./nix/diskusage {inherit pkgs;};
+  fuck = pkgs.callPackage ./nix/fuck {inherit pkgs;};
+  mi = pkgs.callPackage ./nix/mi {inherit pkgs;};
+  nish = pkgs.callPackage ./nix/nish {inherit pkgs;};
+  nix-clean = pkgs.callPackage ./nix/nix-clean {inherit pkgs;};
+  nix-get-sha256 = pkgs.callPackage ./nix/nix-get-sha256 {inherit pkgs;};
+  rm-result = pkgs.callPackage ./nix/rm-result {inherit pkgs;};
+  sec = pkgs.callPackage ./nix/sec {inherit pkgs;};
 in
   stdenv.mkDerivation rec {
     name = "util-scripts";
     version = 0.1;
-    src = ./scripts;
-    buildInputs = [cfg commit cop diskusage fuck mi nish nix-clean nix-get-sha256 rm-result sec];
+    src = ./.;
     installPhase = ''
       mkdir -p $out/bin
       ln -s ${cfg}/bin/* $out/bin

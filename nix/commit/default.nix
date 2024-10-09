@@ -133,11 +133,11 @@
   '';
 in
   stdenv.mkDerivation rec {
-    name = "cfg";
+    name = "commit";
     src = ./.;
-    buildInputs = [cfg];
+    buildInputs = [commit];
     installPhase = ''
       mkdir -p $out/bin
-      cp ${cfg}/bin/* $out/bin
+      cp ${commit}/bin/* $out/bin
     '';
   }

@@ -39,26 +39,6 @@
       fi
     }
 
-    # new_file() {
-    #   if [[ -d $dotdir/$1 ]]; then
-    #     local subdir="$dotdir/$1"
-    #     if [[ -f $subdir/$2 ]]; then
-    #       echo "error: file exists"; exit 1
-    #     else
-    #       if [[ $2 =~ '\.nix' ]]; then
-    #         printf '{\n  \n}' > "$subdir/$2" || exit 1
-    #         newfile="$subdir/$2"
-    #       else
-    #         printf '{\n  \n}' > "$subdir/$2.nix" || exit 1
-    #         newfile="$subdir/$2.nix"
-    #       fi
-    #       "$edit" "$newfile"
-    #     fi
-    #   else
-    #     echo "error: path not found"; exit 1
-    #   fi
-    # }
-
     main() {
       set_edit "$@"
       find_file "$@"

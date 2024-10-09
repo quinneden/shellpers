@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "mi" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "mi" ''
   OS_RELEASE=$(cat /etc/os-release)
 
   if [[ $(grep '^ID' <<<$OS_RELEASE) =~ nixos ]]; then

@@ -1,4 +1,5 @@
-{pkgs, ...}: pkgs.writeShellScriptBin "commit" ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "commit" ''
   git_status_json() {
     # Declare an associative array to store files by status
     declare -A status_files
