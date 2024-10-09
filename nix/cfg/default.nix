@@ -15,14 +15,15 @@
     }
 
     find_file() {
-      read -rd'EOF' CONFIGFILE < <(find $dotdir -type f -iregex ".*/$1.nix" | awk '{ print length(), $0 | "sort -n" }' | sed s/"^[0-9][0-9] "/""/g)
+      if [[ $# -eq 0 ]]; then
+        $edit $dotdir/flake.nix; return 0
+      fi
+
+      read -rd'EOF' CONFIGFILE < <(find $dotdir -type f -iregex ".*/$1.*\.nix" | awk '{ print length(), $0 | "sort -n" }' | sed s/"^[0-9][0-9] "/""/g)
+
       if [[ -z $CONFIGFILE ]]; then
-        if [[ $# -ge 1 ]]; then
-          echo "error: no files matching \"$1\" found in $dotdir"
-          return 1
-        else
-          $edit $dotdir/flake.nix
-        fi
+        echo "error: file not found"
+        return 1
       else
         if [[ $(printf $CONFIGFILE | wc -l) -gt 1 ]]; then
           if [[ $(uname) == 'Linux' && $CONFIGFILE =~ nixos ]]; then
