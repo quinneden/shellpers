@@ -1,10 +1,17 @@
 {
   pkgs,
+  inputs,
   stdenv,
   ...
 }: let
   darwin-switch = pkgs.writeShellScriptBin "darwin-switch" ''
-    /run/current-system/sw/bin/darwin-rebuild switch --flake $HOME/.dotfiles#macos "$@"
+    if [[ ! -d $HOME/.dotfiles ]]; then
+      echo 'error: path not found'; exit 1
+    else
+      cd "$HOME/.dotfiles" || exit 1
+    fi
+
+    ${inputs.nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild switch --flake .#macos
   '';
 in
   stdenv.mkDerivation rec {
