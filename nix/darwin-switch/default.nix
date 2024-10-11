@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   stdenv,
+  system,
   ...
 }: let
   darwin-switch = pkgs.writeShellScriptBin "darwin-switch" ''
