@@ -53,7 +53,7 @@
         local trash_cmd="${pkgs.gtrash}/bin/gtrash put"
         local trash_empty_cmd="${pkgs.gtrash}/bin/gtrash rm -f"
       else
-        local trash_cmd="trash"
+        local trash_cmd="trash -y"
         local trash_empty_cmd="trash -ey"
       fi
 
