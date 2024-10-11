@@ -16,7 +16,7 @@
 
     find_file() {
       if [[ $# -eq 0 ]]; then
-        $edit $dotdir/flake.nix; return 0
+        $edit $dotdir/flake.nix; exit 0
       fi
 
       read -rd'EOF' CONFIGFILE < <(find $dotdir -type f -iregex ".*/$1.*\.nix" | awk '{ print length(), $0 | "sort -n" }' | sed s/"^[0-9][0-9] "/""/g)
