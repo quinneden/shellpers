@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   stdenv,
   system,
   ...
@@ -12,7 +11,7 @@
       cd "$HOME/.dotfiles" || exit 1
     fi
 
-    ${inputs.nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild switch --flake .#macos
+    /run/current-system/sw/bin/darwin-rebuild switch --flake .#macos
   '';
 in
   stdenv.mkDerivation rec {

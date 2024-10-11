@@ -17,10 +17,10 @@
       in {
         packages = {
           default = pkgs.callPackage ./default.nix {inherit self pkgs;};
-          darwin-switch = pkgs.callPackage ./darwin-switch {inherit pkgs;};
           cfg = pkgs.callPackage nix/cfg {inherit pkgs;};
           commit = pkgs.callPackage nix/commit {inherit pkgs;};
           cop = pkgs.callPackage nix/cop {inherit pkgs;};
+          darwin-switch = pkgs.callPackage nix/darwin-switch {inherit pkgs;};
           diskusage = pkgs.callPackage nix/diskusage {inherit pkgs;};
           fuck = pkgs.callPackage nix/fuck {inherit pkgs;};
           lsh = pkgs.callPackage nix/lsh {inherit pkgs;};
