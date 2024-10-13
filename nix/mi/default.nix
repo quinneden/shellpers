@@ -4,12 +4,13 @@
   ...
 }: let
   mi = pkgs.writeShellScriptBin "mi" ''
-    OS_RELEASE=$(cat /etc/os-release)
-
-    if [[ $(grep '^ID' <<<$OS_RELEASE) =~ nixos ]]; then
-      echo -ne '\e[6 q'
-      ${pkgs.micro}/bin/micro "$@"
-      echo -ne '\e[2 q'
+    if [[ $(uname) == Linux ]]; then
+      OS_RELEASE=$(cat /etc/os-release)
+      if [[ $(grep '^ID' <<<$OS_RELEASE) =~ nixos ]]; then
+        echo -ne '\e[6 q'; ${pkgs.micro}/bin/micro "$@"; echo -ne '\e[6 q'
+      else
+        ${pkgs}/bin/micro "$@"
+      fi
     else
       micro "$@"
     fi
@@ -24,3 +25,4 @@ in
       cp ${mi}/bin/* $out/bin
     '';
   }
+#'\e[6 q'
