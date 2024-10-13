@@ -9,7 +9,7 @@
       if [[ $(grep '^ID' <<<$OS_RELEASE) =~ nixos ]]; then
         echo -ne '\e[6 q'; ${pkgs.micro}/bin/micro "$@"; echo -ne '\e[6 q'
       else
-        ${pkgs}/bin/micro "$@"
+        ${pkgs.micro}/bin/micro "$@"
       fi
     else
       micro "$@"
