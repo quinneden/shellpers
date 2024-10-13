@@ -4,53 +4,54 @@
   ...
 }: let
   cfg = pkgs.writeShellScriptBin "cfg" ''
-    dotdir="$HOME"/.dotfiles
+dotdir="$HOME"/.dotfiles
 
-    set_edit() {
-      if [[ $1 == '-c' ]]; then
-        shift; edit='codium'; export edit
+    parse_files() {
+      read -rd'EOF' match_list < <(find $dotdir -type f -iregex ".*/$query.*\.nix")
+
+      if [[ -z $match_list ]]; then
+        echo "error: file not found"; exit 1
       else
-        edit='mi'; export edit
-      fi
-    }
-
-    find_file() {
-      if [[ $# -eq 0 ]]; then
-        $edit $dotdir/flake.nix; return 0
-      fi
-
-      read -rd'EOF' CONFIGFILE < <(find $dotdir -type f -iregex ".*/$1.*\.nix" | awk '{ print length(), $0 | "sort -n" }' | sed s/"^[0-9][0-9] "/""/g)
-
-      if [[ -z $CONFIGFILE ]]; then
-        echo "error: file not found"
-        return 1
-      else
-        if [[ $(printf $CONFIGFILE | wc -l) -gt 1 ]]; then
-          if [[ $(uname) == 'Linux' && $CONFIGFILE =~ nixos ]]; then
-            read -rd'EOF' HEADFILE < <(printf $CONFIGFILE | grep -E "nixos|home-manager" | head -n 1)
-            export HEADFILE
-          elif [[ $(uname) == 'Darwin' && $CONFIGFILE =~ darwin ]]; then
-            read -rd'EOF' HEADFILE < <(printf $CONFIGFILE | grep -E "darwin|home-manager" | head -n 1)
-            export HEADFILE
-          fi
-        else
-          read -rd'EOF' HEADFILE < <(printf $CONFIGFILE | head -n 1)
-          export HEADFILE
-        fi
+        read -rd'EOF' match_darwin < <(printf "%s\n" $match_list | grep -i -E "darwin")
+        read -rd'EOF' match_nixos < <(printf "%s\n" $match_list | grep -i -E "nixos")
+        export match_darwin match_nixos
       fi
     }
 
     main() {
-      set_edit "$@"
-      find_file "$@"
-      if [[ $# -ge 1 ]]; then
-        "$edit" "$HEADFILE"
+      if [[ $1 =~ ^-.$ ]]; then
+        case "$1" in
+          -c)
+            edit='codium'
+            ;;
+          -a)
+            EDIT_ALL=1
+            edit='mi'
+            ;;
+        esac
+        shift
       else
-        "$edit" "$dotdir"/flake.nix
+        edit='mi'
+      fi
+
+      export query="$1"
+
+      parse_files
+
+      if [[ $(uname) == 'Darwin' ]]; then
+        read -rd'EOF' -a file_arr < <(printf "%s\n" $match_darwin $match_list | sort -u)
+      else
+        read -rd'EOF' -a file_arr < <(printf "%s\n" $match_nixos $match_list | sort -u)
+      fi
+
+      if [[ $EDIT_ALL == 1 ]]; then
+        for f in "''${file_arr[@]}"; do $edit "$f"; done
+      else
+        $edit "''${file_arr}"
       fi
     }
 
-    main "$@"
+    main "$@" || exit 1
   '';
 in
   stdenv.mkDerivation rec {
