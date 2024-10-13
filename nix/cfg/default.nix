@@ -50,7 +50,7 @@
       fi
     }
 
-    main "$@" && exit
+    main "$@"
   '';
 in
   stdenv.mkDerivation rec {
