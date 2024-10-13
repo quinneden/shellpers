@@ -40,7 +40,7 @@
                 echo "KEEP $i"
             else
                 echo "RM $i"
-                rm -rf "$i"
+                sudo rm -rf "$i"
             fi
         done
     }
