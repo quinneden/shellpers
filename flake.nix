@@ -22,7 +22,6 @@
           default = pkgs.callPackage ./default.nix { inherit self pkgs; };
           cfg = pkgs.callPackage nix/cfg { inherit pkgs; };
           commit = pkgs.callPackage nix/commit { inherit pkgs; };
-          commit-new = pkgs.callPackage nix/commit-new { inherit pkgs; };
           cop = pkgs.callPackage nix/cop { inherit pkgs; };
           darwin-switch = pkgs.callPackage nix/darwin-switch { inherit pkgs; };
           diskusage = pkgs.callPackage nix/diskusage { inherit pkgs; };

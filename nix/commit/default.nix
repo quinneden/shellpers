@@ -108,6 +108,7 @@ let
           cat $msg
 
           if confirm; then
+            git add .
             git commit -F $msg
           fi
         }
