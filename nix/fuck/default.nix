@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   fuck = pkgs.writeShellScriptBin "fuck" ''
     parse_args() {
       for f in "''${@}"; do
@@ -27,8 +28,20 @@
     }
 
     trash_files() {
+      if [[ $(uname) == 'Linux' ]]; then
+        owner=$(stat -c "%u" $f)
+      else
+        owner=$(stat -f "%u" $f)
+      fi
+
       if [[ -n ''${files} ]]; then
-        eval $trash_cmd "''${files[@]}"
+        for f in "''${files[@]}"; do
+          if [[ $owner -eq 0 ]]; then
+            eval sudo $trash_cmd "$f"
+          else
+            eval $trash_cmd "$f"
+          fi
+        done
       fi
 
       if [[ $? -eq 0 ]]; then
@@ -70,12 +83,12 @@
     main "''${@}" || exit 1
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "fuck";
-    src = ./.;
-    buildInputs = [fuck];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${fuck}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "fuck";
+  src = ./.;
+  buildInputs = [ fuck ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${fuck}/bin/* $out/bin
+  '';
+}
