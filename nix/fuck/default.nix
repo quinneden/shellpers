@@ -25,6 +25,8 @@ let
           fi
         done
       done
+
+      fucked_files+=(''${files[@]}); export fucked_files
     }
 
     trash_files() {
@@ -38,8 +40,10 @@ let
         for f in "''${files[@]}"; do
           if [[ $owner -eq 0 ]]; then
             eval sudo $trash_cmd "$f"
+            sudo printf "%s:%s\n" "$f" "$(find $TRASHDIR -iname $(basename $f) 2>/dev/null)" >> $HOME/.cache/.fucked
           else
             eval $trash_cmd "$f"
+            printf "%s:%s\n" "$(find $TRASHDIR -iname $(basename $f) 2>/dev/null)" "$f" >> $HOME/.cache/.fucked
           fi
         done
       fi
@@ -54,7 +58,7 @@ let
       if [[ $EMPTY_NOW -eq 1 ]]; then
         $trash_empty_cmd "''${files[@]}" &>/dev/null
       else
-        ((sleep 60 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
+        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
       fi
     }
 
@@ -66,6 +70,7 @@ let
         local trash_cmd="${pkgs.gtrash}/bin/gtrash put"
         local trash_empty_cmd="${pkgs.gtrash}/bin/gtrash rm -f"
       else
+        TRASHDIR="$HOME/.Trash"
         local trash_cmd="trash -y"
         local trash_empty_cmd="trash -ey"
       fi
@@ -82,13 +87,51 @@ let
 
     main "''${@}" || exit 1
   '';
+
+  unfuck = pkgs.writeShellScriptBin "unfuck" ''
+    parse_args() {
+      if [[ $# -ge 1 ]]; then
+        for arg in "''${@}"; do
+          restore+=("$(find $TRASHDIR -iname "$arg" -maxdepth 1)")
+        done
+      fi
+    }
+
+    main() {
+      if [[ $(uname) == 'Darwin' ]]; then
+        TRASHDIR="$HOME/.Trash"
+      fi
+
+      parse_args "$@"
+      if [[ -f $HOME/.cache/.fucked ]]; then
+        read -d'EOF' -a fucked_files < <(cat $HOME/.cache/.fucked)
+        for line in "''${fucked_files[@]}"; do
+          for f in "''${restore[@]}"; do
+            lines+=("$(grep -o -e "^.*$f:.*$" <<< $line)")
+          done
+        done
+        for l in "''${lines[@]}"; do
+          mv $(tr ':' ' ' <<< $l) 2>/dev/null
+        done
+      else
+        echo 'error: .fucked: file not found'; exit 1
+      fi
+    }
+
+    main "$@" || exit 1
+  '';
+
 in
 stdenv.mkDerivation rec {
   name = "fuck";
   src = ./.;
-  buildInputs = [ fuck ];
+  buildInputs = [
+    fuck
+    unfuck
+  ];
   installPhase = ''
     mkdir -p $out/bin
     cp ${fuck}/bin/* $out/bin
+    cp ${unfuck}/bin/* $out/bin
   '';
 }
