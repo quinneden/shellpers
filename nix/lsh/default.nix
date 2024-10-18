@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   lsh = pkgs.writeShellScriptBin "lsh" ''
     lima_json=$(limactl list --json | jq -r '{name: .name, status: .status}')
 
@@ -43,13 +44,12 @@
     main "$@" || exit 1
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "lsh";
-    src = ./.;
-    buildInputs = [lsh];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${lsh}/bin/* $out/bin
-    '';
-  }
-
+stdenv.mkDerivation rec {
+  name = "lsh";
+  src = ./.;
+  buildInputs = [ lsh ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${lsh}/bin/* $out/bin
+  '';
+}

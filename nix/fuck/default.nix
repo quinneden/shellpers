@@ -58,7 +58,7 @@ let
       if [[ $EMPTY_NOW -eq 1 ]]; then
         $trash_empty_cmd "''${files[@]}" &>/dev/null
       else
-        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
+        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null; rm $HOME/.cache/.fucked) &)
       fi
     }
 

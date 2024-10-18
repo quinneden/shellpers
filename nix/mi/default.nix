@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   mi = pkgs.writeShellScriptBin "mi" ''
     if [[ $(uname) == Linux ]]; then
       OS_RELEASE=$(cat /etc/os-release)
@@ -16,13 +17,13 @@
     fi
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "mi";
-    src = ./.;
-    buildInputs = [mi];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${mi}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "mi";
+  src = ./.;
+  buildInputs = [ mi ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${mi}/bin/* $out/bin
+  '';
+}
 #'\e[6 q'

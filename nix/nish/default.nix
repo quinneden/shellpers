@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   nish = pkgs.writeShellScriptBin "nish" ''
     parse_args() {
       if [[ $# -ge 1 ]]; then
@@ -55,12 +56,12 @@
     nish_command "$@"; exit
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "nish";
-    src = ./.;
-    buildInputs = [nish];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${nish}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "nish";
+  src = ./.;
+  buildInputs = [ nish ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${nish}/bin/* $out/bin
+  '';
+}

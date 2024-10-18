@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   cop = pkgs.writeShellScriptBin "cop" ''
     parse_args() {
       if [[ $# -eq 0 ]]; then
@@ -34,12 +35,12 @@
     main "''${@}"; exit
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "cop";
-    src = ./.;
-    buildInputs = [cop];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${cop}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "cop";
+  src = ./.;
+  buildInputs = [ cop ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${cop}/bin/* $out/bin
+  '';
+}

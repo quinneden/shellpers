@@ -36,6 +36,7 @@
           sec = pkgs.callPackage nix/sec { inherit pkgs; };
           wipe-linux = pkgs.callPackage nix/wipe-linux { inherit pkgs; };
         };
+        formatter = pkgs.nixfmt-rfc-style;
       }
     );
 }

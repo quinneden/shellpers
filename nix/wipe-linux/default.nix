@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   wipe-linux = pkgs.writeShellScriptBin "wipe-linux" ''
     set -e
 
@@ -55,13 +56,12 @@
     main && exit 0
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "wipe-linux";
-    src = ./.;
-    buildInputs = [wipe-linux];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${wipe-linux}/bin/* $out/bin
-    '';
-  }
-
+stdenv.mkDerivation rec {
+  name = "wipe-linux";
+  src = ./.;
+  buildInputs = [ wipe-linux ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${wipe-linux}/bin/* $out/bin
+  '';
+}

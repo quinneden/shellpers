@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   diskusage = pkgs.writeShellScriptBin "diskusage" ''
     ncdu_root() {
       test_file=$(ncdu -f /tmp/ncdu_root.json -o- &>/dev/null && echo OK)
@@ -82,12 +83,12 @@
     main "$@" || exit 1
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "diskusage";
-    src = ./.;
-    buildInputs = [diskusage];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${diskusage}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "diskusage";
+  src = ./.;
+  buildInputs = [ diskusage ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${diskusage}/bin/* $out/bin
+  '';
+}

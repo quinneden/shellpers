@@ -3,7 +3,8 @@
   lib,
   stdenv,
   ...
-}: let
+}:
+let
   sec = pkgs.writeShellScriptBin "sec" ''
     KEYCHAIN="secrets.keychain"
 
@@ -60,12 +61,12 @@
     main "$@"
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "sec";
-    src = ./.;
-    buildInputs = [sec];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${sec}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "sec";
+  src = ./.;
+  buildInputs = [ sec ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${sec}/bin/* $out/bin
+  '';
+}

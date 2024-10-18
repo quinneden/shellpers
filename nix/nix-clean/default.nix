@@ -2,7 +2,8 @@
   pkgs,
   stdenv,
   ...
-}: let
+}:
+let
   nix-clean = pkgs.writeShellScriptBin "nix-clean" ''
     message_loop() {
       while [[ $BREAK == 0 ]]; do
@@ -34,12 +35,12 @@
     main || exit 1
   '';
 in
-  stdenv.mkDerivation rec {
-    name = "nix-clean";
-    src = ./.;
-    buildInputs = [nix-clean];
-    installPhase = ''
-      mkdir -p $out/bin
-      cp ${nix-clean}/bin/* $out/bin
-    '';
-  }
+stdenv.mkDerivation rec {
+  name = "nix-clean";
+  src = ./.;
+  buildInputs = [ nix-clean ];
+  installPhase = ''
+    mkdir -p $out/bin
+    cp ${nix-clean}/bin/* $out/bin
+  '';
+}
