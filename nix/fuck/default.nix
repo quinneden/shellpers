@@ -4,9 +4,6 @@
   ...
 }:
 let
-  trashCmd = pkgs.writeShellScriptBin "trashCmd" ''${pkgs.trash-cli}/bin/trash-put --trash-dir $HOME/.Trash -f'';
-  trashEmptyCmd = pkgs.writeShellScriptBin "trashCmd" ''${pkgs.trash-cli}/bin/trash-empty --trash-dir $HOME/.Trash -f'';
-
   fuck = pkgs.writeShellScriptBin "fuck" ''
     parse_args() {
       for f in "''${@}"; do
@@ -129,8 +126,6 @@ stdenv.mkDerivation rec {
   buildInputs = [
     fuck
     unfuck
-    trashCmd
-    trashEmptyCmd
   ];
   installPhase = ''
     mkdir -p $out/bin
