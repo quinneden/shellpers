@@ -4,13 +4,18 @@
   ...
 }:
 let
+  trashCmd = pkgs.writeShellScriptBin "trashCmd" ''${pkgs.trash-cli}/bin/trash-put --trash-dir $HOME/.Trash -f'';
+  trashEmptyCmd = pkgs.writeShellScriptBin "trashCmd" ''${pkgs.trash-cli}/bin/trash-empty --trash-dir $HOME/.Trash -f'';
+
   fuck = pkgs.writeShellScriptBin "fuck" ''
     parse_args() {
       for f in "''${@}"; do
         if [[ -L $f ]]; then
-          files+=("$f")
-        elif [[ -e $f ]]; then
-          files+=("$(realpath $f 2>/dev/null)")
+          abs_symlink=$(${pkgs.coreutils}/bin/realpath -s $f)
+          files+=("$abs_symlink")
+        elif [[ ! -L $f && -e $f ]]; then
+          abs_path=$(${pkgs.coreutils}/bin/realpath -q $f)
+          files+=("$abs_path")
         else
           echo "error: path does not exist"
           exit 1
@@ -25,8 +30,6 @@ let
           fi
         done
       done
-
-      fucked_files+=(''${files[@]}); export fucked_files
     }
 
     trash_files() {
@@ -40,10 +43,8 @@ let
         for f in "''${files[@]}"; do
           if [[ $owner -eq 0 ]]; then
             eval sudo $trash_cmd "$f"
-            sudo printf "%s:%s\n" "$f" "$(find $TRASHDIR -iname $(basename $f) 2>/dev/null)" >> $HOME/.cache/.fucked
           else
             eval $trash_cmd "$f"
-            printf "%s:%s\n" "$(find $TRASHDIR -iname $(basename $f) 2>/dev/null)" "$f" >> $HOME/.cache/.fucked
           fi
         done
       fi
@@ -58,7 +59,7 @@ let
       if [[ $EMPTY_NOW -eq 1 ]]; then
         $trash_empty_cmd "''${files[@]}" &>/dev/null
       else
-        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null; rm $HOME/.cache/.fucked) &)
+        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
       fi
     }
 
@@ -67,12 +68,12 @@ let
       local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
 
       if [[ $(uname) == "Linux" ]]; then
-        local trash_cmd="${pkgs.gtrash}/bin/gtrash put"
-        local trash_empty_cmd="${pkgs.gtrash}/bin/gtrash rm -f"
+        local trash_cmd="${pkgs.trash-cli}/bin/trash-put -f"
+        local trash_empty_cmd="${pkgs.trash-cli}/bin/trash-empty -f"
       else
         TRASHDIR="$HOME/.Trash"
-        local trash_cmd="trash -y"
-        local trash_empty_cmd="trash -ey"
+        local trash_cmd="${pkgs.trash-cli}/bin/trash-put --trash-dir $TRASHDIR -f"
+        local trash_empty_cmd="${pkgs.trash-cli}/bin/trash-empty --trash-dir $TRASHDIR -f"
       fi
 
       if [[ $1 == '-e' ]]; then
@@ -90,9 +91,15 @@ let
 
   unfuck = pkgs.writeShellScriptBin "unfuck" ''
     parse_args() {
+      args=()
+      restore=()
       if [[ $# -ge 1 ]]; then
-        for arg in "''${@}"; do
-          restore+=("$(find $TRASHDIR -iname "$arg" -maxdepth 1)")
+        for i in "''${@}"; do args+=("$(basename $i)"); done
+        for arg in "''${args[@]}"; do
+          if [[ -f $TRASHDIR/info/$arg.trashinfo ]]; then
+            orig_path=$(awk -F'='  '/Path/ {print $2}' < $TRASHDIR/info/$arg.trashinfo)
+            restore+=("$orig_path")
+          fi
         done
       fi
     }
@@ -100,22 +107,16 @@ let
     main() {
       if [[ $(uname) == 'Darwin' ]]; then
         TRASHDIR="$HOME/.Trash"
+        trash_restore_cmd="${pkgs.trash-cli}/bin/trash-restore --trash-dir $HOME/.Trash"
+      else
+        trash_restore_cmd="${pkgs.trash-cli}/bin/trash-restore"
       fi
 
       parse_args "$@"
-      if [[ -f $HOME/.cache/.fucked ]]; then
-        read -d'EOF' -a fucked_files < <(cat $HOME/.cache/.fucked)
-        for line in "''${fucked_files[@]}"; do
-          for f in "''${restore[@]}"; do
-            lines+=("$(grep -o -e "^.*$f:.*$" <<< $line)")
-          done
-        done
-        for l in "''${lines[@]}"; do
-          mv $(tr ':' ' ' <<< $l) 2>/dev/null
-        done
-      else
-        echo 'error: .fucked: file not found'; exit 1
-      fi
+
+      for f in "''${restore[@]}"; do
+        eval $trash_restore_cmd "$f" <<<'0' >/dev/null
+      done
     }
 
     main "$@" || exit 1
@@ -128,6 +129,8 @@ stdenv.mkDerivation rec {
   buildInputs = [
     fuck
     unfuck
+    trashCmd
+    trashEmptyCmd
   ];
   installPhase = ''
     mkdir -p $out/bin
