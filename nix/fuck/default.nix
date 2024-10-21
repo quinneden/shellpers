@@ -14,7 +14,7 @@ let
           abs_path=$(${pkgs.coreutils}/bin/realpath -q $f)
           files+=("$abs_path")
         else
-          echo "error: path does not exist"
+          echo "error: $f: path does not exist"
           exit 1
         fi
       done
