@@ -1,5 +1,5 @@
 {
-  description = "Flake outputs for binaries of various shell scripts.";
+  description = "Flake for all of my personal (opinionated) shell scripts.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -18,6 +18,11 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
+        overlays = rec {
+          shellScripts = import ./nix/overlay.nix;
+          default = shellScripts;
+        };
+
         packages = {
           default = pkgs.callPackage ./default.nix { inherit self pkgs; };
           cfg = pkgs.callPackage nix/cfg { inherit pkgs; };
@@ -36,6 +41,7 @@
           sec = pkgs.callPackage nix/sec { inherit pkgs; };
           wipe-linux = pkgs.callPackage nix/wipe-linux { inherit pkgs; };
         };
+
         formatter = pkgs.nixfmt-rfc-style;
       }
     );
