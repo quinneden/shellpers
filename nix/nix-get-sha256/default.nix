@@ -5,11 +5,10 @@
 }:
 let
   nix-get-sha256 = pkgs.writeShellScriptBin "nix-get-sha256" ''
-    if [[ $@ =~ '-u' || $@ =~ '--unpack' ]]; then
-      OPT='--unpack'
-    fi
     URL="$1"
-    read -r PREFETCH_URL < <(nix-prefetch-url $OPT "$URL" 2>/dev/null | tr -d '\n')
+
+    read -r PREFETCH_URL < <(nix-prefetch-url "$URL" 2>/dev/null)
+
     if [[ ${#PREFETCH_URL} -eq 52 ]]; then
       nix hash to-sri --type sha256 "$PREFETCH_URL"
     else
