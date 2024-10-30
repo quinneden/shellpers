@@ -12,7 +12,7 @@ let
     if [[ ${#PREFETCH_URL} -eq 52 ]]; then
       nix hash to-sri --type sha256 "$PREFETCH_URL"
     else
-      echo "error: couldn't prefetch url" && exit 1
+      echo "error: couldn't prefetch url"
     fi
   '';
 in
