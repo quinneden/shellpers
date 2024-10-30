@@ -5,7 +5,10 @@
 }:
 let
   nix-switch = pkgs.writeShellScriptBin "nix-switch" ''
-    sudo nixos-rebuild switch --flake $HOME/.dotfiles#nixos $@
+    FLAKE="$HOME/.dotfiles"
+    HOSTNAME="$(hostname)"
+
+    ${pkgs.nh}/bin/nh os switch "$@"
   '';
 in
 stdenv.mkDerivation rec {
