@@ -9,7 +9,7 @@ let
 
     read -r PREFETCH_URL < <(nix-prefetch-url "$URL" 2>/dev/null)
 
-    if [[ ${#PREFETCH_URL} -eq 52 ]]; then
+    if [[ ''${#PREFETCH_URL} -eq 52 ]]; then
       nix hash to-sri --type sha256 "$PREFETCH_URL"
     else
       echo "error: couldn't prefetch url"
