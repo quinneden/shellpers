@@ -1,4 +1,5 @@
 final: prev: {
+  nix-shell-scripts = final.callPackage ../default.nix { inherit final; };
   cfg = final.callPackage ./cfg { inherit final; };
   commit = final.callPackage ./commit { inherit final; };
   cop = final.callPackage ./cop { inherit final; };
