@@ -23,7 +23,7 @@ let
   wipe-linux = pkgs.callPackage ./nix/wipe-linux { inherit pkgs; };
 in
 stdenv.mkDerivation rec {
-  name = "util-scripts";
+  name = "nix-shell-scripts";
   version = 0.1;
   src = ./.;
   installPhase = ''
