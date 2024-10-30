@@ -18,11 +18,6 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
-        overlays = rec {
-          shellScripts = import ./nix/overlay.nix;
-          default = shellScripts;
-        };
-
         packages = {
           default = pkgs.callPackage ./default.nix { inherit self pkgs; };
           cfg = pkgs.callPackage nix/cfg { inherit pkgs; };
