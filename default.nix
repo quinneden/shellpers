@@ -18,6 +18,7 @@ let
   nix-clean = pkgs.callPackage ./nix/nix-clean { inherit pkgs; };
   nix-switch = pkgs.callPackage ./nix/nix-switch { inherit pkgs; };
   nix-get-sha256 = pkgs.callPackage ./nix/nix-get-sha256 { inherit pkgs; };
+  readme = pkgs.callPackage ./nix/readme { inherit pkgs; };
   rm-result = pkgs.callPackage ./nix/rm-result { inherit pkgs; };
   sec = pkgs.callPackage ./nix/sec { inherit pkgs; };
   wipe-linux = pkgs.callPackage ./nix/wipe-linux { inherit pkgs; };
@@ -40,6 +41,7 @@ stdenv.mkDerivation rec {
     ln -s ${nix-clean}/bin/* $out/bin
     ln -s ${nix-get-sha256}/bin/* $out/bin
     ln -s ${nix-switch}/bin/* $out/bin
+    ln -s ${readme}/bin/* $out/bin
     ln -s ${rm-result}/bin/* $out/bin
     ln -s ${sec}/bin/* $out/bin
     ln -s ${wipe-linux}/bin/* $out/bin
