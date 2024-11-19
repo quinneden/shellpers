@@ -12,7 +12,7 @@ let
       cd "$HOME/.dotfiles" || exit 1
     fi
 
-    /run/current-system/sw/bin/darwin-rebuild switch --flake .#macos
+    /run/current-system/sw/bin/darwin-rebuild switch --flake .#macos "$@"
   '';
 in
 stdenv.mkDerivation rec {
