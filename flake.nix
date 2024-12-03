@@ -32,6 +32,7 @@
           nix-clean = pkgs.callPackage nix/nix-clean { inherit pkgs; };
           nix-switch = pkgs.callPackage nix/nix-switch { inherit pkgs; };
           nix-get-sha256 = pkgs.callPackage nix/nix-get-sha256 { inherit pkgs; };
+          nixos-deploy = pkgs.callPackage nix/nixos-deploy { inherit pkgs; };
           readme = pkgs.callPackage nix/readme { inherit pkgs; };
           rm-result = pkgs.callPackage nix/rm-result { inherit pkgs; };
           sec = pkgs.callPackage nix/sec { inherit pkgs; };
