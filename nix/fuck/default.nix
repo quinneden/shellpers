@@ -54,9 +54,9 @@ let
 
     empty_trash() {
       if [[ $EMPTY_NOW -eq 1 ]]; then
-        $trash_empty_cmd "''${files[@]}" &>/dev/null
+        $trash_empty_cmd &>/dev/null
       else
-        ((sleep 180 && $trash_empty_cmd "''${files[@]}" &>/dev/null) &)
+        ((sleep 180 && $trash_empty_cmd &>/dev/null) &)
       fi
     }
 
@@ -64,7 +64,7 @@ let
       local files=()
       local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
 
-      if [[ $(uname) == "Linux" ]]; then
+      if [[ $(uname) == 'Linux' ]]; then
         local trash_cmd="${pkgs.trash-cli}/bin/trash-put -f"
         local trash_empty_cmd="${pkgs.trash-cli}/bin/trash-empty -f"
       else
@@ -130,6 +130,8 @@ stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/bin
     cp ${fuck}/bin/* $out/bin
+    cp ${fuck}/bin/* $out/bin/del
     cp ${unfuck}/bin/* $out/bin
+    cp ${unfuck}/bin/* $out/bin/udel
   '';
 }
