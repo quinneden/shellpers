@@ -1,10 +1,14 @@
 {
+  lib,
   pkgs,
   stdenv,
+  writeShellScriptBin,
+  writeText,
+  installShellFiles,
   ...
 }:
 let
-  fuck = pkgs.writeShellScriptBin "fuck" ''
+  fuck = writeShellScriptBin "fuck" ''
     parse_args() {
       for f in "''${@}"; do
         if [[ -L $f ]]; then
@@ -86,7 +90,7 @@ let
     main "''${@}" || exit 1
   '';
 
-  unfuck = pkgs.writeShellScriptBin "unfuck" ''
+  unfuck = writeShellScriptBin "unfuck" ''
     parse_args() {
       args=()
       restore=()
@@ -119,19 +123,46 @@ let
     main "$@" || exit 1
   '';
 
+  unfuckCompletion = writeText "_unfuck" (
+    if stdenv.isDarwin then
+      ''
+        _unfuck() {
+          _files -W ~/.Trash/files/
+        } && compdef _unfuck unfuck udel
+      ''
+    else
+      ''
+        _unfuck() {
+          _files -W ~/.local/share/trash/files/
+        } && compdef _unfuck unfuck udel
+      ''
+  );
+
 in
 stdenv.mkDerivation rec {
   name = "fuck";
+
   src = ./.;
+
+  nativeBuildInputs = [
+    installShellFiles
+  ];
+
   buildInputs = [
     fuck
     unfuck
   ];
+
   installPhase = ''
     mkdir -p $out/bin
-    cp ${fuck}/bin/* $out/bin
-    cp ${fuck}/bin/* $out/bin/del
-    cp ${unfuck}/bin/* $out/bin
-    cp ${unfuck}/bin/* $out/bin/udel
+    cp ${lib.getExe fuck} $out/bin
+    cp ${lib.getExe fuck} $out/bin/del
+    cp ${lib.getExe unfuck} $out/bin
+    cp ${lib.getExe unfuck} $out/bin/udel
+    ${postInstall}
+  '';
+
+  postInstall = ''
+    installShellCompletion --zsh ${unfuckCompletion}
   '';
 }
