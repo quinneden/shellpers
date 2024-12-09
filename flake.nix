@@ -29,7 +29,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ self.overlays.${system}.default ];
+            overlays = [ self.overlays.default ];
           };
         in
         {

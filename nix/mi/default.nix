@@ -1,21 +1,20 @@
 {
+  lib,
   pkgs,
   stdenv,
   ...
 }:
 let
-  mi = pkgs.writeShellScriptBin "mi" ''
-    if [[ $(uname) == Linux ]]; then
-      OS_RELEASE=$(cat /etc/os-release)
-      if [[ $(grep '^ID' <<<$OS_RELEASE) =~ nixos ]]; then
-        echo -ne '\e[6 q'; ${pkgs.micro}/bin/micro "$@"; echo -ne '\e[6 q'
-      else
-        ${pkgs.micro}/bin/micro "$@"
-      fi
+  mi = pkgs.writeShellScriptBin "mi" (
+    if stdenv.isLinux then
+      ''
+        echo -ne '\e[6 q'; ${lib.getExe pkgs.micro} "$@"; echo -ne '\e[6 q'
+      ''
     else
-      micro "$@"
-    fi
-  '';
+      ''
+        ${lib.getExe pkgs.micro} "$@"
+      ''
+  );
 in
 stdenv.mkDerivation rec {
   name = "mi";
@@ -23,7 +22,6 @@ stdenv.mkDerivation rec {
   buildInputs = [ mi ];
   installPhase = ''
     mkdir -p $out/bin
-    cp ${mi}/bin/* $out/bin
+    cp ${lib.getExe mi} $out/bin
   '';
 }
-#'\e[6 q'
