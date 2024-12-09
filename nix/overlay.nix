@@ -11,6 +11,7 @@ final: prev: {
   nix-clean = final.callPackage ./nix-clean { };
   nix-switch = final.callPackage ./nix-switch { };
   nix-get-sha256 = final.callPackage ./nix-get-sha256 { };
+  nixos-deploy = final.callPackage ./nixos-deploy { };
   readme = final.callPackage ./readme { };
   rm-result = final.callPackage ./rm-result { };
   sec = final.callPackage ./sec { };
