@@ -126,15 +126,31 @@ let
   unfuckCompletion = writeText "_unfuck" (
     if stdenv.isDarwin then
       ''
+        #compdef unfuck udel
+
         _unfuck() {
           _files -W ~/.Trash/files/
-        } && compdef _unfuck unfuck udel
+        }
+
+        if [ "$funcstack[1]" = "_unfuck" ]; then
+            _unfuck "$@"
+        else
+            compdef _unfuck unfuck udel
+        fi
       ''
     else
       ''
+        #compdef unfuck udel
+
         _unfuck() {
           _files -W ~/.local/share/trash/files/
-        } && compdef _unfuck unfuck udel
+        }
+
+        if [ "$funcstack[1]" = "_unfuck" ]; then
+            _unfuck "$@"
+        else
+            compdef _unfuck unfuck udel
+        fi
       ''
   );
 
