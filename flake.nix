@@ -1,45 +1,60 @@
 {
-  description = "Flake for all of my personal (opinionated) shell scripts.";
+  description = "Flake for my personal (opinionated) shell scripts.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
-      self,
       nixpkgs,
-      flake-utils,
+      self,
+      ...
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        packages = {
-          default = pkgs.callPackage ./default.nix { inherit self pkgs; };
-          cfg = pkgs.callPackage nix/cfg { inherit pkgs; };
-          commit = pkgs.callPackage nix/commit { inherit pkgs; };
-          cop = pkgs.callPackage nix/cop { inherit pkgs; };
-          darwin-switch = pkgs.callPackage nix/darwin-switch { inherit pkgs; };
-          diskusage = pkgs.callPackage nix/diskusage { inherit pkgs; };
-          fuck = pkgs.callPackage nix/fuck { inherit pkgs; };
-          lsh = pkgs.callPackage nix/lsh { inherit pkgs; };
-          mi = pkgs.callPackage nix/mi { inherit pkgs; };
-          nish = pkgs.callPackage nix/nish { inherit pkgs; };
-          nix-clean = pkgs.callPackage nix/nix-clean { inherit pkgs; };
-          nix-switch = pkgs.callPackage nix/nix-switch { inherit pkgs; };
-          nix-get-sha256 = pkgs.callPackage nix/nix-get-sha256 { inherit pkgs; };
-          nixos-deploy = pkgs.callPackage nix/nixos-deploy { inherit pkgs; };
-          readme = pkgs.callPackage nix/readme { inherit pkgs; };
-          rm-result = pkgs.callPackage nix/rm-result { inherit pkgs; };
-          sec = pkgs.callPackage nix/sec { inherit pkgs; };
-          wipe-linux = pkgs.callPackage nix/wipe-linux { inherit pkgs; };
-        };
+    let
+      forEachSystem = nixpkgs.lib.genAttrs [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
+    in
+    {
+      overlays = rec {
+        nix-shell-scripts = import ./nix/overlay.nix;
+        default = nix-shell-scripts;
+      };
 
-        formatter = pkgs.nixfmt-rfc-style;
-      }
-    );
+      packages = forEachSystem (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.${system}.default ];
+          };
+        in
+        {
+          inherit (pkgs)
+            cfg
+            commit
+            cop
+            darwin-switch
+            diskusage
+            fuck
+            lsh
+            mi
+            nish
+            nix-clean
+            nix-get-sha256
+            nix-switch
+            nixos-deploy
+            readme
+            rm-result
+            sec
+            wipe-linux
+            ;
+        }
+      );
+
+      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+    };
 }
