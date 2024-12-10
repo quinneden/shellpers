@@ -1,26 +1,23 @@
 {
+  lib,
   pkgs,
   stdenv,
-  system,
   ...
 }:
 let
   darwin-switch = pkgs.writeShellScriptBin "darwin-switch" ''
-    if [[ ! -d $HOME/.dotfiles ]]; then
-      echo 'error: path not found'; exit 1
-    else
-      cd "$HOME/.dotfiles" || exit 1
-    fi
-
-    /run/current-system/sw/bin/darwin-rebuild switch --flake .#macos "$@"
+    [[ -d $HOME/.dotfiles ]] || (echo 'error: dotfiles not found in path: ~/.dotfiles'; exit 1)
+    ${lib.getExe pkgs.nh} darwin switch ~/.dotfiles#darwinConfigurations.macos -- "$@"
   '';
 in
 stdenv.mkDerivation rec {
   name = "darwin-switch";
   src = ./.;
-  buildInputs = [ darwin-switch ];
+  buildInputs = [
+    darwin-switch
+  ];
   installPhase = ''
     mkdir -p $out/bin
-    cp ${darwin-switch}/bin/* $out/bin
+    cp ${lib.getExe darwin-switch} $out/bin
   '';
 }
