@@ -1,5 +1,6 @@
 final: prev: {
   adl = final.callPackage ./adl { };
+  alphabetize = final.callPackage ./alphabetize { };
   cfg = final.callPackage ./cfg { };
   clone = final.callPackage ./clone { };
   colortable = final.callPackage ./colortable { };

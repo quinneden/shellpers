@@ -38,6 +38,7 @@
         in
         {
           inherit (pkgs)
+            alphabetize
             adl
             cfg
             clone
