@@ -34,7 +34,7 @@ let
     }
 
     trash_files() {
-      owner=$(${pkgs.coreutils}/bin/stat -f "%u" $f)
+      owner=$(${pkgs.coreutils}/bin/stat -c '%u' $f)
 
       if [[ -n ''${files} ]]; then
         for f in "''${files[@]}"; do
