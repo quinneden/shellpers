@@ -34,11 +34,7 @@ let
     }
 
     trash_files() {
-      if [[ $(uname) == 'Linux' ]]; then
-        owner=$(stat -c "%u" $f)
-      else
-        owner=$(stat -f "%u" $f)
-      fi
+      owner=$(${pkgs.coreutils}/bin/stat -f "%u" $f)
 
       if [[ -n ''${files} ]]; then
         for f in "''${files[@]}"; do
