@@ -108,7 +108,7 @@ let
           cat $msg
 
           if confirm; then
-            git add .
+            git add $(git rev-parse --show-toplevel)
             git commit -F $msg
           fi
         }
