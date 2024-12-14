@@ -6,10 +6,11 @@
   ...
 }:
 let
+  paste = if stdenv.isLinux then "${pkgs.wl-clipboard}/bin/wl-paste" else "pbpaste";
   alphabetize = writeShellScriptBin "alphabetize" ''
-    pb="$(pbpaste)"
+    pb="$(${paste})"
 
-    if [[ -z $pb ]]; then
+    if [[ $1 == '-n' ]] || [[ -z $pb ]]; then
       while read -r line; do
         [[ -z $line ]] && break
         list+=("$line")
