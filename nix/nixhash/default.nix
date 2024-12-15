@@ -8,8 +8,14 @@
 let
   nix-prefetch-url = "${pkgs.nix}/bin/nix-prefetch-url";
   nixhash = writeShellScriptBin "nixhash" ''
+    if [[ $? -ge 2 && $1 =~ '-.*' ]]; then
+      opts="$1"; shift
+    fi
+
     URL="$1"
-    PREFETCH_URL=$(${nix-prefetch-url} "$URL" 2>/dev/null)
+
+    PREFETCH_URL=$(${nix-prefetch-url} $opts "$URL" 2>/dev/null)
+
     ${lib.getExe pkgs.nix} hash to-sri --type sha256 "$PREFETCH_URL"
   '';
 in
