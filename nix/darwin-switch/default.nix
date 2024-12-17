@@ -14,7 +14,6 @@ stdenv.mkDerivation rec {
   name = "darwin-switch";
   src = ./.;
   buildInputs = [
-    pkgs.nh
     darwin-switch
   ];
   installPhase = ''
