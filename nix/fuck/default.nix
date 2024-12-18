@@ -177,4 +177,6 @@ stdenv.mkDerivation rec {
   postInstall = ''
     installShellCompletion --zsh ${unfuckCompletion}
   '';
+
+  meta.mainProgram = "fuck";
 }
