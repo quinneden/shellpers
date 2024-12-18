@@ -54,7 +54,7 @@ let
 
     empty_trash() {
       if [[ $EMPTY_NOW -eq 1 ]]; then
-        $trash_empty_cmd &>/dev/null
+        (($trash_empty_cmd &>/dev/null) &)
       else
         ((sleep 180 && $trash_empty_cmd &>/dev/null) &)
       fi

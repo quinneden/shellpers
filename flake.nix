@@ -1,5 +1,5 @@
 {
-  description = "Flake for my personal (opinionated) shell scripts.";
+  description = "Various shell script tools. Some opinionated.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -16,7 +16,6 @@
       forEachSystem = nixpkgs.lib.genAttrs [
         "aarch64-darwin"
         "aarch64-linux"
-        "x86_64-linux"
       ];
     in
     {
@@ -29,7 +28,7 @@
         system:
         let
           pkgs = import nixpkgs {
-            inherit system inputs;
+            inherit system;
             overlays = [
               self.overlays.default
               inputs.nh.overlays.default
@@ -52,7 +51,6 @@
             mi
             nish
             nix-clean
-            nix-get-sha256
             nix-switch
             nixhash
             nixos-deploy
@@ -64,6 +62,43 @@
             ;
         }
       );
+
+      apps = forEachSystem (system: {
+        cashout =
+          let
+            inherit (nixpkgs.legacyPackages.${system})
+              cachix
+              jq
+              lib
+              writeShellScriptBin
+              ;
+          in
+          {
+            type = "app";
+            program = lib.getExe (
+              writeShellScriptBin "cashout" ''
+                nix flake archive --json |
+                  jq -r '.path,(.inputs|to_entries[].value.path)' |
+                  cachix push quinneden
+                for target in $(
+                  nix flake show --json --all-systems | jq '
+                  "packages" as $top |
+                  .[$top] |
+                  to_entries[] |
+                  .key as $arch |
+                  .value |
+                  keys[] |
+                  "\($top).\($arch).\(.)"
+                  ' | tr -d '"'
+                ); do
+                  nix build --json ".#$target" "''${@:2}" |
+                  	jq -r '.[].outputs | to_entries[].value' |
+                  	cachix push quinneden
+                done
+              ''
+            );
+          };
+      });
 
       formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
     };
