@@ -60,6 +60,8 @@
             swatch
             wipe-linux
             ;
+
+          metapackage = pkgs.callPackage ./nix/metapackage.nix { inherit self; };
         }
       );
 
