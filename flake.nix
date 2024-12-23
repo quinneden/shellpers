@@ -79,9 +79,6 @@
             type = "app";
             program = lib.getExe (
               writeShellScriptBin "cashout" ''
-                nix flake archive --json |
-                  jq -r '.path,(.inputs|to_entries[].value.path)' |
-                  cachix push quinneden
                 for target in $(
                   nix flake show --json --all-systems | jq '
                   "packages" as $top |
@@ -93,7 +90,7 @@
                   "\($top).\($arch).\(.)"
                   ' | tr -d '"'
                 ); do
-                  nix build --json ".#$target" "''${@:2}" |
+                  nix build --json ".#$target" |
                   	jq -r '.[].outputs | to_entries[].value' |
                   	cachix push quinneden
                 done

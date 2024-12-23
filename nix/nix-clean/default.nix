@@ -55,6 +55,7 @@ let
 
     if [[ $DRY == true ]]; then
       flags+=("--dry")
+    fi
 
     nh clean all --ask "''${flags[@]}"
   '';
