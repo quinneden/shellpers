@@ -2,9 +2,11 @@ name: "Cache all flake outputs for each compatible system."
 
 on:
   pull_request:
-    - branches: main
+    branches:
+      - main
   push:
-    - branches: main
+    branches:
+      - main
 
 jobs:
   tests:
