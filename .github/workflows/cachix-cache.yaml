@@ -23,8 +23,10 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: |
         nix flake show --json --all-systems | \
-          jq -r '"packages" as $top | .[$top] |
-                 to_entries[] | .key as $arch |
-                 .value | keys[] |
-                 ".#\($top).\($arch).\(.)"' | \
+          jq -r '"packages" as $top
+          | .[$top]
+          | to_entries[]
+          | select(.key == "aarch64-linux")
+          | .value | keys[]
+          | ".#\($top).aarch64-linux.\(.)"' | \
           nix build --stdin
