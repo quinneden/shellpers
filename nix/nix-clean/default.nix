@@ -7,25 +7,6 @@
   ...
 }:
 let
-  #   collect-garbage = writeShellScript "collect-garbage" ''
-  #     DELETE_OLD="''${DELETE_OLD:-false}"
-  #     DAYS="''${DAYS:-}"
-  #
-  #     if $DELETE_OLD; then
-  #       if [[ -n $DAYS ]]; then
-  #         opts=("--keep-since" "$DAYS")
-  #       else
-  #         opts=("-d")
-  #       fi
-  #     fi
-  #
-  #     read -ra arr1 < <(sudo nix-collect-garbage ''${opts[@]})
-  #     read -ra arr2 < <(nix-collect-garbage ''${opts[@]})
-  #     read -r store_paths < <(awk "BEGIN {print ''${arr1[0]}+''${arr2[0]}; exit}")
-  #     read -r mib_float < <(awk "BEGIN {print ''${arr1[4]}+''${arr2[4]}; exit}")
-  #     printf "%s" "$store_paths $mib_float"
-  #   '';
-
   nix-clean = writeShellScriptBin "nix-clean" ''
     has_argument() {
       [[ ("$1" == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
@@ -55,6 +36,7 @@ let
 
           KEEP=$(extract_argument "$@")
           shift 2
+          ;;
 
         --dry)
           DRY=true
