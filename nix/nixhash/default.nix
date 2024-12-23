@@ -59,7 +59,7 @@ let
             exit 1
           fi
 
-          shift; shift
+          shift 2
           ;;
 
         *)
