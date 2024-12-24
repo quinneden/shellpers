@@ -19,6 +19,7 @@ in
 stdenv.mkDerivation rec {
   name = "mi";
   src = ./.;
+  nativeBuildInputs = [ pkgs.micro ];
   buildInputs = [ mi ];
   installPhase = ''
     mkdir -p $out/bin
