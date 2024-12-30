@@ -9,7 +9,7 @@
 let
   nix-clean = writeShellScriptBin "nix-clean" ''
     has_argument() {
-      [[ ("$1" == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
+      [[ ($1 == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
     }
 
     extract_argument() {

@@ -2,33 +2,44 @@
   lib,
   pkgs,
   stdenv,
-  system,
   ...
 }:
 let
   readme = pkgs.writeShellScriptBin "readme" ''
-    if [[ $# -ge 1 ]]
+    if [[ -n $1 ]]
     then
-    	read -r readme_file < <(fd -i "$1" "$PWD")
+    	readme_file="$1"
     else
-    	read -r readme_file < <(fd "readme" --max-depth 1 .) || read -r readme_file < <(fd "readme" --max-depth 1 ..)
+      if git status &>/dev/null; then
+        toplevel=$(git rev-parse --show-toplevel)
+        readme_file=$(fd -i "README" "$toplevel")
+      else
+    	  readme_file=$(fd -i "README" --max-depth 1 . || fd -i "README" --max-depth 1 ..)
+    	fi
     fi
 
-    if [[ ! -f $readme_file ]]
+    if [[ -z $readme_file ]]
     then
     	echo "error: file not found"
     	exit 1
     else
-    	${lib.getExe pkgs.glow} $readme_file
+    	PAGER="bat --file-name $(basename $readme_file)"
+    	glow "$readme_file"
     fi
   '';
 in
 stdenv.mkDerivation rec {
   name = "readme";
   src = ./.;
+
+  nativeBuildInputs = with pkgs; [
+    bat
+    glow
+  ];
+
   buildInputs = [ readme ];
   installPhase = ''
     mkdir -p $out/bin
-    cp ${readme}/bin/* $out/bin
+    cp ${lib.getExe readme} $out/bin
   '';
 }

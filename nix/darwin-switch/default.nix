@@ -11,9 +11,7 @@ let
       exit 1
     fi
 
-    nh darwin switch --hostname macos -- "$@"
-
-    rm -rf ./result
+    nh darwin switch --hostname macos -- --no-link "$@"
   '';
 in
 stdenv.mkDerivation rec {
