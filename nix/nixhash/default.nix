@@ -5,8 +5,9 @@
   writeShellScriptBin,
   ...
 }:
+with lib;
 let
-  nix-prefetch-url = "${pkgs.nix}/bin/nix-prefetch-url";
+  nix-prefetch-url = getExe' pkgs.nix "nix-prefetch-url";
 
   copyToPb = if stdenv.isLinux then "wl-copy" else "pbcopy";
 
@@ -90,7 +91,7 @@ let
 
     confirm "Copy to clipboard?" || exit 0
 
-    ${copyToPb} <<<"$HASH"
+    printf "$HASH" | ${copyToPb}
   '';
 in
 stdenv.mkDerivation rec {
