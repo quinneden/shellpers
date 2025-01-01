@@ -12,6 +12,7 @@ let
     fi
 
     nh darwin switch --hostname macos -- "$@"
+    sudo rm -f ./result
   '';
 in
 stdenv.mkDerivation rec {
