@@ -20,7 +20,7 @@
     in
     {
       overlays = rec {
-        nix-shell-scripts = import ./nix/overlay.nix;
+        nix-shell-scripts = import ./src/overlay.nix;
         default = nix-shell-scripts;
       };
 
@@ -61,12 +61,12 @@
             wipe-linux
             ;
 
-          metapackage = pkgs.callPackage ./nix/metapackage.nix { inherit self; };
+          metapackage = pkgs.callPackage ./src/metapackage.nix { inherit self; };
         }
       );
 
       apps = forEachSystem (system: {
-        cashout =
+        cacheout =
           let
             inherit (nixpkgs.legacyPackages.${system})
               cachix
@@ -75,27 +75,26 @@
               writeShellScriptBin
               ;
           in
+          with lib;
           {
             type = "app";
-            program = lib.getExe (
-              writeShellScriptBin "cashout" ''
-                for target in $(
-                  nix flake show --json --all-systems | jq '
-                  "packages" as $top |
-                  .[$top] |
-                  to_entries[] |
-                  .key as $arch |
-                  .value |
-                  keys[] |
-                  "\($top).\($arch).\(.)"
-                  ' | tr -d '"'
-                ); do
-                  nix build --json ".#$target" |
-                  	jq -r '.[].outputs | to_entries[].value' |
-                  	cachix push quinneden
-                done
-              ''
-            );
+            program = ''
+              for target in $(
+                nix flake show --json --all-systems | jq '
+                "packages" as $top |
+                .[$top] |
+                to_entries[] |
+                .key as $arch |
+                .value |
+                keys[] |
+                "\($top).\($arch).\(.)"
+                ' | tr -d '"'
+              ); do
+                nix build --json ".#$target" |
+                	jq -r '.[].outputs | to_entries[].value' |
+                	cachix push quinneden
+              done
+            '';
           };
       });
 
