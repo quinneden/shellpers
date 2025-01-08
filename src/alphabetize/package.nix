@@ -23,7 +23,7 @@ let
     printf '%s' "$input" | sort
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "alphabetize";
   src = ./.;
 

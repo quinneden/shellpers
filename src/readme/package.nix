@@ -28,7 +28,7 @@ let
     fi
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "readme";
   src = ./.;
 

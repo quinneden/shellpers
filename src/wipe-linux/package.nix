@@ -56,7 +56,7 @@ let
     main && exit 0
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "wipe-linux";
   src = ./.;
   buildInputs = [ wipe-linux ];

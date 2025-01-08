@@ -16,7 +16,7 @@ let
       ''
   );
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "mi";
   src = ./.;
   nativeBuildInputs = [ pkgs.micro ];

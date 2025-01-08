@@ -61,7 +61,7 @@ let
     main "$@"
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "sec";
   src = ./.;
   buildInputs = [ sec ];

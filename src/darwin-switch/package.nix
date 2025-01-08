@@ -14,7 +14,7 @@ let
     nh darwin switch --hostname macos -- "$@"
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "darwin-switch";
 
   src = ./.;

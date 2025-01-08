@@ -11,7 +11,7 @@ let
     ${pkgs.nh}/bin/nh os switch "$@"
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "nix-switch";
   src = ./.;
   buildInputs = [ nix-switch ];

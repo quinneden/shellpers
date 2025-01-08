@@ -1,31 +1,27 @@
 {
-  lib,
   pkgs,
   stdenv,
-  writeShellScriptBin,
-  ...
+  writeShellScript,
 }:
 let
-  adl = writeShellScriptBin "adl" ''
+  script = writeShellScript "a2dl" ''
     URL="$1"
     if [[ "$URL" =~ ^http[s]*:// ]]; then
       output_dir="''${2:-$PWD}"
-      "${lib.getExe pkgs.aria2}" "$URL" -d "$output_dir"
+      aria2c "$URL" -d "$output_dir"
     else
       echo "error: malformed url"; exit 1
     fi
   '';
 in
-stdenv.mkDerivation rec {
-  name = "adl";
+stdenv.mkDerivation {
+  pname = "a2dl";
   src = ./.;
 
-  buildInputs = [
-    adl
-  ];
+  nativeBuildInputs = [ pkgs.aria2 ];
 
   installPhase = ''
     mkdir -p $out/bin
-    cp ${lib.getExe adl} $out/bin
+    install -m 755 ${script} $out/bin
   '';
 }

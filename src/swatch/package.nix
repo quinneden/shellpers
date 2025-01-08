@@ -26,7 +26,7 @@ let
     echo -e "              $ansi_escape"
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "swatch";
   src = ./.;
 

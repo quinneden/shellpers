@@ -44,7 +44,7 @@ let
     main "$@" || exit 1
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "lsh";
   src = ./.;
   buildInputs = [ lsh ];

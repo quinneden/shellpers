@@ -13,10 +13,25 @@
       ...
     }@inputs:
     let
-      forEachSystem = nixpkgs.lib.genAttrs [
-        "aarch64-darwin"
-        "aarch64-linux"
-      ];
+      forEachSystem =
+        function:
+        nixpkgs.lib.genAttrs
+          [
+            "aarch64-darwin"
+            "aarch64-linux"
+          ]
+          (
+            system:
+            function (
+              import nixpkgs {
+                inherit system;
+                overlay = [
+                  self.overlays.default
+                  inputs.nh.overlays.default
+                ];
+              }
+            )
+          );
     in
     {
       overlays = rec {
@@ -25,80 +40,84 @@
       };
 
       packages = forEachSystem (
-        system:
+        pkgs:
         let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [
-              self.overlays.default
-              inputs.nh.overlays.default
-            ];
-          };
+          inherit (pkgs.stdenv) isDarwin;
         in
         {
           inherit (pkgs)
             alphabetize
-            adl
+            a2dl
             cfg
             clone
             colortable
             commit
             cop
-            darwin-switch
             diskusage
             fuck
-            lsh
             mi
             nish
             nix-clean
-            nix-switch
             nixhash
             nixos-deploy
             readme
             rm-result
-            sec
             swatch
-            wipe-linux
             ;
 
           metapackage = pkgs.callPackage ./src/metapackage.nix { inherit self; };
         }
+        // (
+          if isDarwin then
+            {
+              inherit (pkgs)
+                lsh
+                darwin-switch
+                sec
+                wipe-linux
+                ;
+            }
+          else
+            {
+              inherit (pkgs) nix-switch;
+            }
+        )
       );
 
-      apps = forEachSystem (system: {
-        cacheout =
-          let
-            inherit (nixpkgs.legacyPackages.${system})
-              cachix
-              jq
-              lib
-              writeShellScriptBin
-              ;
-          in
-          with lib;
-          {
-            type = "app";
-            program = ''
-              for target in $(
-                nix flake show --json --all-systems | jq '
-                "packages" as $top |
-                .[$top] |
-                to_entries[] |
-                .key as $arch |
-                .value |
-                keys[] |
-                "\($top).\($arch).\(.)"
-                ' | tr -d '"'
-              ); do
-                nix build --json ".#$target" |
-                	jq -r '.[].outputs | to_entries[].value' |
-                	cachix push quinneden
-              done
-            '';
-          };
-      });
+      apps = forEachSystem (
+        { pkgs, lib }:
+        {
+          cacheout =
+            let
+              cacheAllPkgs = pkgs.writeShellApplication {
+                runtimeInputs = with pkgs; [
+                  cachix
+                  jq
+                ];
+                text = ''
+                  for target in $(
+                    nix flake show --json --all-systems \
+                      | jq -r '"packages" as $top \
+                      | .[$top] | to_entries[] \
+                      | .key as $arch | .value \
+                      | keys[] | "\($top).\($arch).\(.)"'
+                  ); do
+                    nix build --json ".#$target" \
+                      | jq -r '.[].outputs \
+                      | to_entries[].value' \
+                      | cachix push quinneden
+                  done                
+                '';
+              };
+            in
+            {
+              type = "app";
+              program = lib.getExe cacheAllPkgs;
+            };
+        }
+      );
 
-      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forEachSystem (pkgs: pkgs.nixfmt-rfc-style);
     };
 
   nixConfig = {

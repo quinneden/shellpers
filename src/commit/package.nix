@@ -116,7 +116,7 @@ let
         main; rm -f $tmp $msg; exit
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "commit";
   src = ./.;
   buildInputs = [ commit ];

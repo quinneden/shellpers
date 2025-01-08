@@ -56,7 +56,7 @@ let
     nish_command "$@"; exit
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "nish";
   src = ./.;
   buildInputs = [ nish ];

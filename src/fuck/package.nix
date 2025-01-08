@@ -151,7 +151,7 @@ let
   );
 
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "fuck";
 
   src = ./.;

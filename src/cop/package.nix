@@ -35,7 +35,7 @@ let
     main "''${@}"; exit
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "cop";
   src = ./.;
   buildInputs = [ cop ];

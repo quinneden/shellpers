@@ -27,7 +27,7 @@ let
     fi
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "clone";
   src = ./.;
 

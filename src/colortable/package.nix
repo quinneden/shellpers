@@ -12,7 +12,7 @@ let
     done | column -x
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "colortable";
   src = ./.;
 

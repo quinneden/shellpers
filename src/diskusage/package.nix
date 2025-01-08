@@ -83,7 +83,7 @@ let
     main "$@" || exit 1
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "diskusage";
   src = ./.;
   buildInputs = [ diskusage ];

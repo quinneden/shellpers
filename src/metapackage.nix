@@ -1,12 +1,11 @@
 {
-  pkgs,
   self,
   stdenv,
   ...
 }:
 let
   pkgNames = [
-    "adl"
+    "a2dl"
     "alphabetize"
     "cfg"
     "clone"
@@ -32,9 +31,8 @@ let
 
   pkgExe = map (pkg: toString self.packages.aarch64-darwin.${pkg} + "/bin/${pkg}") pkgNames;
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "metapackage";
-
   src = ./.;
 
   installPhase = ''

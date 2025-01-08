@@ -38,7 +38,7 @@ let
     main "''${@}" && exit
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "rm-result";
   src = ./.;
   buildInputs = [ rm-result ];

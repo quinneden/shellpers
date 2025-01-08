@@ -2,3 +2,4 @@
 result
 **/*.old
 **/*.bak
+src/template.nix

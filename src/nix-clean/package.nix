@@ -3,11 +3,10 @@
   pkgs,
   stdenv,
   writeShellScript,
-  writeShellScriptBin,
   ...
 }:
 let
-  nix-clean = writeShellScriptBin "nix-clean" ''
+  nix-clean = writeShellScript "nix-clean" ''
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
     }
@@ -60,7 +59,7 @@ let
     nh clean all --ask "''${flags[@]}"
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "nix-clean";
   src = ./.;
   nativeBuildInputs = [ pkgs.nh ];

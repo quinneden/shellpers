@@ -94,7 +94,7 @@ let
     printf "$HASH" | ${copyToPb}
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "nixhash";
   src = ./.;
 
