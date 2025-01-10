@@ -1,10 +1,6 @@
-{
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  rm-result = pkgs.writeShellScriptBin "rm-result" ''
+  script = writeShellScript "rm-result" ''
     main() {
       if [[ $# -eq 0 ]]; then
         if [[ -L ./result ]]; then
@@ -41,9 +37,11 @@ in
 stdenv.mkDerivation rec {
   name = "rm-result";
   src = ./.;
-  buildInputs = [ rm-result ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${rm-result}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

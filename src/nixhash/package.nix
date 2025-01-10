@@ -1,17 +1,12 @@
 {
-  lib,
-  pkgs,
+  nix,
   stdenv,
-  writeShellScriptBin,
-  ...
+  writeShellScript,
 }:
-with lib;
 let
-  nix-prefetch-url = getExe' pkgs.nix "nix-prefetch-url";
-
   copyToPb = if stdenv.isLinux then "wl-copy" else "pbcopy";
 
-  nixhash = writeShellScriptBin "nixhash" ''
+  script = writeShellScript "nixhash" ''
     usage() {
       echo "Usage: nixhash [--unpack] <URL>"
     }
@@ -75,9 +70,9 @@ let
     done
 
     if [[ $UNPACK == true ]]; then
-      PREFETCH_URL=$(${nix-prefetch-url} --unpack "$URL" 2>/dev/null)
+      PREFETCH_URL=$(nix-prefetch-url --unpack "$URL" 2>/dev/null)
     else
-      PREFETCH_URL=$(${nix-prefetch-url} "$URL" 2>/dev/null)
+      PREFETCH_URL=$(nix-prefetch-url "$URL" 2>/dev/null)
     fi
 
     if [[ -z $PREFETCH_URL ]]; then
@@ -98,12 +93,12 @@ stdenv.mkDerivation rec {
   name = "nixhash";
   src = ./.;
 
-  buildInputs = [
-    nixhash
-  ];
+  nativeBuildInputs = [ nix ];
 
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe nixhash} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

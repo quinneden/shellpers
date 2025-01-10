@@ -1,10 +1,6 @@
-{
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  lsh = pkgs.writeShellScriptBin "lsh" ''
+  script = writeShellScript "lsh" ''
     lima_json=$(limactl list --json | jq -r '{name: .name, status: .status}')
 
     parse_args() {
@@ -47,9 +43,11 @@ in
 stdenv.mkDerivation rec {
   name = "lsh";
   src = ./.;
-  buildInputs = [ lsh ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lsh}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

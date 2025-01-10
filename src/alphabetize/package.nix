@@ -1,14 +1,9 @@
-{
-  lib,
-  pkgs,
-  stdenv,
-  writeShellScriptBin,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  paste = if stdenv.isLinux then "${pkgs.wl-clipboard}/bin/wl-paste" else "pbpaste";
-  alphabetize = writeShellScriptBin "alphabetize" ''
-    pb="$(${paste})"
+  pasteCmd = if stdenv.isLinux then "wl-paste" else "pbpaste";
+
+  script = writeShellScript "alphabetize" ''
+    pb="$(${pasteCmd})"
 
     if [[ $1 == '-n' ]] || [[ -z $pb ]]; then
       while read -r line; do
@@ -27,12 +22,10 @@ stdenv.mkDerivation rec {
   name = "alphabetize";
   src = ./.;
 
-  buildInputs = [
-    alphabetize
-  ];
-
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe alphabetize} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

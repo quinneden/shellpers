@@ -1,14 +1,9 @@
-{
-  lib,
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
   inherit (stdenv) isDarwin;
   forSystem = if isDarwin then "darwin" else "nixos";
 
-  cfg = pkgs.writeShellScriptBin "cfg" ''
+  script = writeShellScript "cfg" ''
     dotdir="$HOME/.dotfiles"
     pos="''${1:-}"
     system="${forSystem}"
@@ -56,13 +51,13 @@ let
     fi
   '';
 in
-with lib;
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "cfg";
   src = ./.;
-  buildInputs = [ cfg ];
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    install -m 755 ${getExe cfg} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }
