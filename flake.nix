@@ -8,10 +8,22 @@
   outputs =
     { nixpkgs, self }:
     let
-      forEachSystem = nixpkgs.lib.genAttrs [
-        "aarch64-darwin"
-        "aarch64-linux"
-      ];
+      forEachSystem =
+        function:
+        nixpkgs.lib.genAttrs
+          [
+            "aarch64-darwin"
+            "aarch64-linux"
+          ]
+          (
+            system:
+            function (
+              import nixpkgs {
+                inherit system;
+                overlays = [ self.overlays.default ];
+              }
+            )
+          );
     in
     {
       overlays = rec {
@@ -19,78 +31,70 @@
         default = nix-shell-scripts;
       };
 
-      packages = forEachSystem (
-        system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
+      packages = forEachSystem (pkgs: {
+        inherit (pkgs)
+          a2dl
+          alphabetize
+          cfg
+          clone
+          colortable
+          commit
+          cop
+          darwin-switch
+          diskusage
+          del
+          lsh
+          mi
+          nish
+          nix-clean
+          nix-switch
+          nixhash
+          nixos-deploy
+          readme
+          rm-result
+          swatch
+          wipe-linux
+          ;
+
+        metapackage =
+          with pkgs;
+          buildEnv {
+            name = "metapackage";
+            paths = [
+              a2dl
+              alphabetize
+              cfg
+              clone
+              colortable
+              commit
+              cop
+              darwin-switch
+              diskusage
+              del
+              lsh
+              mi
+              nish
+              nix-clean
+              nix-switch
+              nixhash
+              nixos-deploy
+              readme
+              rm-result
+              swatch
+              wipe-linux
+            ];
           };
-        in
-        {
-          inherit (pkgs)
-            a2dl
-            alphabetize
-            cfg
-            clone
-            colortable
-            commit
-            cop
-            darwin-switch
-            diskusage
-            del
-            lsh
-            mi
-            nish
-            nix-clean
-            nix-switch
-            nixhash
-            nixos-deploy
-            readme
-            rm-result
-            swatch
-            wipe-linux
-            ;
+      });
 
-          metapackage =
-            with pkgs;
-            buildEnv {
-              name = "metapackage";
-              paths = [
-                a2dl
-                alphabetize
-                cfg
-                clone
-                colortable
-                commit
-                cop
-                darwin-switch
-                diskusage
-                del
-                lsh
-                mi
-                nish
-                nix-clean
-                nix-switch
-                nixhash
-                nixos-deploy
-                readme
-                rm-result
-                swatch
-                wipe-linux
-              ];
-            };
-        }
-      );
-
-      apps = forEachSystem (
-        system:
-        let
-          inherit (nixpkgs.legacyPackages.${system}) writeShellApplication cachix lib;
-        in
-        with lib;
-        {
-          cacheout = {
+      apps = forEachSystem (pkgs: rec {
+        default = cacheout;
+        cacheout =
+          let
+            inherit (pkgs) writeShellApplication cachix lib;
+            inherit (pkgs.stdenv) isDarwin;
+          in
+          with lib;
+          {
             type = "app";
             program = getExe (writeShellApplication {
               name = "cacheout";
@@ -98,15 +102,14 @@
               text = ''
                 cachix push quinneden < <(
                   nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
-                  nix build --no-link --print-out-paths .#packages.aarch64-linux.metapackage
+                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
                 )
               '';
             });
           };
-        }
-      );
+      });
 
-      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forEachSystem (pkgs: pkgs.nixfmt-rfc-style);
     };
 
   nixConfig = {
