@@ -32,58 +32,60 @@
       };
 
       packages = forEachSystem (pkgs: {
-        inherit (pkgs)
-          a2dl
-          alphabetize
-          cfg
-          clone
-          colortable
-          commit
-          cop
-          darwin-switch
-          diskusage
-          del
-          lsh
-          mi
-          nish
-          nix-clean
-          nix-switch
-          nixhash
-          nixos-deploy
-          readme
-          rm-result
-          swatch
-          wipe-linux
-          ;
+        nix-shell-scripts = {
+          inherit (pkgs)
+            a2dl
+            alphabetize
+            cfg
+            clone
+            colortable
+            commit
+            cop
+            darwin-switch
+            diskusage
+            del
+            lsh
+            mi
+            nish
+            nix-clean
+            nix-switch
+            nixhash
+            nixos-deploy
+            readme
+            rm-result
+            swatch
+            wipe-linux
+            ;
 
-        metapackage =
-          with pkgs;
-          buildEnv {
-            name = "metapackage";
-            paths = [
-              a2dl
-              alphabetize
-              cfg
-              clone
-              colortable
-              commit
-              cop
-              darwin-switch
-              diskusage
-              del
-              lsh
-              mi
-              nish
-              nix-clean
-              nix-switch
-              nixhash
-              nixos-deploy
-              readme
-              rm-result
-              swatch
-              wipe-linux
-            ];
-          };
+          metapackage =
+            with pkgs;
+            buildEnv {
+              name = "metapackage";
+              paths = [
+                a2dl
+                alphabetize
+                cfg
+                clone
+                colortable
+                commit
+                cop
+                darwin-switch
+                diskusage
+                del
+                lsh
+                mi
+                nish
+                nix-clean
+                nix-switch
+                nixhash
+                nixos-deploy
+                readme
+                rm-result
+                swatch
+                wipe-linux
+              ];
+            };
+        };
       });
 
       apps = forEachSystem (pkgs: rec {
@@ -101,8 +103,8 @@
               runtimeInputs = [ cachix ];
               text = ''
                 cachix push quinneden < <(
-                  nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
-                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
+                  nix build --no-link --print-out-paths .#packages.nix-shell-scripts.aarch64-darwin.metapackage
+                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.nix-shell-scripts.aarch64-darwin.metapackage"}
                 )
               '';
             });
