@@ -1,21 +1,18 @@
 {
-  lib,
-  pkgs,
   stdenv,
-  writeShellScriptBin,
   writeText,
+  writeShellScript,
   installShellFiles,
-  ...
 }:
 let
-  fuck = writeShellScriptBin "fuck" ''
+  del = writeShellScript "del" ''
     parse_args() {
       for f in "''${@}"; do
         if [[ -L $f ]]; then
-          abs_symlink=$(${pkgs.coreutils}/bin/realpath -s $f)
+          abs_symlink=$(realpath -s $f)
           files+=("$abs_symlink")
         elif [[ ! -L $f && -e $f ]]; then
-          abs_path=$(${pkgs.coreutils}/bin/realpath -q $f)
+          abs_path=$(realpath -q $f)
           files+=("$abs_path")
         else
           echo "error: $f: path does not exist"
@@ -34,7 +31,7 @@ let
     }
 
     trash_files() {
-      owner=$(${pkgs.coreutils}/bin/stat -c '%u' $f)
+      owner=$(stat -c '%u' $f)
 
       if [[ -n ''${files} ]]; then
         for f in "''${files[@]}"; do
@@ -65,12 +62,12 @@ let
       local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
 
       if [[ $(uname) == 'Linux' ]]; then
-        local trash_cmd="${pkgs.trash-cli}/bin/trash-put -f"
-        local trash_empty_cmd="${pkgs.trash-cli}/bin/trash-empty -f"
+        local trash_cmd="trash-put -f"
+        local trash_empty_cmd="trash-empty -f"
       else
         TRASHDIR="$HOME/.Trash"
-        local trash_cmd="${pkgs.trash-cli}/bin/trash-put --trash-dir $TRASHDIR -f"
-        local trash_empty_cmd="${pkgs.trash-cli}/bin/trash-empty --trash-dir $TRASHDIR -f"
+        local trash_cmd="trash-put --trash-dir $TRASHDIR -f"
+        local trash_empty_cmd="trash-empty --trash-dir $TRASHDIR -f"
       fi
 
       if [[ $1 == '-e' ]]; then
@@ -86,7 +83,7 @@ let
     main "''${@}" || exit 1
   '';
 
-  unfuck = writeShellScriptBin "unfuck" ''
+  undel = writeShellScript "undel" ''
     parse_args() {
       args=()
       restore=()
@@ -104,9 +101,9 @@ let
     main() {
       if [[ $(uname) == 'Darwin' ]]; then
         TRASHDIR="$HOME/.Trash"
-        trash_restore_cmd="${pkgs.trash-cli}/bin/trash-restore --trash-dir $HOME/.Trash"
+        trash_restore_cmd="trash-restore --trash-dir $HOME/.Trash"
       else
-        trash_restore_cmd="${pkgs.trash-cli}/bin/trash-restore"
+        trash_restore_cmd="trash-restore"
       fi
 
       parse_args "$@"
@@ -119,64 +116,55 @@ let
     main "$@" || exit 1
   '';
 
-  unfuckCompletion = writeText "_unfuck" (
+  undelCompletion = writeText "_undel" (
     if stdenv.isDarwin then
       ''
-        #compdef unfuck udel
+        #compdef undel udel
 
-        _unfuck() {
+        _undel() {
           _files -W ~/.Trash/files/
         }
 
-        if [ "$funcstack[1]" = "_unfuck" ]; then
-            _unfuck "$@"
+        if [ "$funcstack[1]" = "_undel" ]; then
+            _undel "$@"
         else
-            compdef _unfuck unfuck udel
+            compdef _undel undel udel
         fi
       ''
     else
       ''
-        #compdef unfuck udel
+        #compdef undel udel
 
-        _unfuck() {
+        _undel() {
           _files -W ~/.local/share/trash/files/
         }
 
-        if [ "$funcstack[1]" = "_unfuck" ]; then
-            _unfuck "$@"
+        if [ "$funcstack[1]" = "_undel" ]; then
+            _undel "$@"
         else
-            compdef _unfuck unfuck udel
+            compdef _undel undel udel
         fi
       ''
   );
-
 in
-stdenv.mkDerivation {
-  name = "fuck";
-
+stdenv.mkDerivation rec {
+  name = "del";
   src = ./.;
 
-  nativeBuildInputs = [
-    installShellFiles
-  ];
-
-  buildInputs = [
-    fuck
-    unfuck
-  ];
+  nativeBuildInputs = [ installShellFiles ];
 
   installPhase = ''
+    runHook preInstall
+
     mkdir -p $out/bin
-    cp ${lib.getExe fuck} $out/bin
-    cp ${lib.getExe fuck} $out/bin/del
-    cp ${lib.getExe unfuck} $out/bin
-    cp ${lib.getExe unfuck} $out/bin/udel
-    ${postInstall}
-  '';
 
-  postInstall = ''
-    installShellCompletion --zsh ${unfuckCompletion}
-  '';
+    install -m 755 ${del} $out/bin/del
+    install -m 755 ${undel} $out/bin/undel
 
-  meta.mainProgram = "fuck";
+    ln -s $out/bin/undel $out/bin/udel
+
+    installShellCompletion --zsh ${undelCompletion}
+
+    runHook postInstall
+  '';
 }

@@ -3,35 +3,15 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nh.url = "github:viperml/nh";
   };
 
   outputs =
-    {
-      nixpkgs,
-      self,
-      ...
-    }@inputs:
+    { nixpkgs, self }:
     let
-      forEachSystem =
-        function:
-        nixpkgs.lib.genAttrs
-          [
-            "aarch64-darwin"
-            "aarch64-linux"
-          ]
-          (
-            system:
-            function (
-              import nixpkgs {
-                inherit system;
-                overlay = [
-                  self.overlays.default
-                  inputs.nh.overlays.default
-                ];
-              }
-            )
-          );
+      forEachSystem = nixpkgs.lib.genAttrs [
+        "aarch64-darwin"
+        "aarch64-linux"
+      ];
     in
     {
       overlays = rec {
@@ -40,84 +20,93 @@
       };
 
       packages = forEachSystem (
-        pkgs:
+        system:
         let
-          inherit (pkgs.stdenv) isDarwin;
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
         in
         {
           inherit (pkgs)
-            alphabetize
             a2dl
+            alphabetize
             cfg
             clone
             colortable
             commit
             cop
+            darwin-switch
             diskusage
-            fuck
+            del
+            lsh
             mi
             nish
             nix-clean
+            nix-switch
             nixhash
             nixos-deploy
             readme
             rm-result
             swatch
+            wipe-linux
             ;
 
-          metapackage = pkgs.callPackage ./src/metapackage.nix { inherit self; };
-        }
-        // (
-          if isDarwin then
-            {
-              inherit (pkgs)
-                lsh
+          metapackage =
+            with pkgs;
+            buildEnv {
+              name = "metapackage";
+              paths = [
+                a2dl
+                alphabetize
+                cfg
+                clone
+                colortable
+                commit
+                cop
                 darwin-switch
-                sec
+                diskusage
+                del
+                lsh
+                mi
+                nish
+                nix-clean
+                nix-switch
+                nixhash
+                nixos-deploy
+                readme
+                rm-result
+                swatch
                 wipe-linux
-                ;
-            }
-          else
-            {
-              inherit (pkgs) nix-switch;
-            }
-        )
-      );
-
-      apps = forEachSystem (
-        { pkgs, lib }:
-        {
-          cacheout =
-            let
-              cacheAllPkgs = pkgs.writeShellApplication {
-                runtimeInputs = with pkgs; [
-                  cachix
-                  jq
-                ];
-                text = ''
-                  for target in $(
-                    nix flake show --json --all-systems \
-                      | jq -r '"packages" as $top \
-                      | .[$top] | to_entries[] \
-                      | .key as $arch | .value \
-                      | keys[] | "\($top).\($arch).\(.)"'
-                  ); do
-                    nix build --json ".#$target" \
-                      | jq -r '.[].outputs \
-                      | to_entries[].value' \
-                      | cachix push quinneden
-                  done                
-                '';
-              };
-            in
-            {
-              type = "app";
-              program = lib.getExe cacheAllPkgs;
+              ];
             };
         }
       );
 
-      formatter = forEachSystem (pkgs: pkgs.nixfmt-rfc-style);
+      apps = forEachSystem (
+        system:
+        let
+          inherit (nixpkgs.legacyPackages.${system}) writeShellApplication cachix lib;
+        in
+        with lib;
+        {
+          cacheout = {
+            type = "app";
+            program = getExe (writeShellApplication {
+              name = "cacheout";
+              runtimeInputs = [ cachix ];
+              text = ''
+                cachix push quinneden < <(
+                  nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
+                  nix build --no-link --print-out-paths .#packages.aarch64-linux.metapackage
+                )
+              '';
+            });
+          };
+        }
+      );
+
+      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
     };
 
   nixConfig = {

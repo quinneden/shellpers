@@ -1,10 +1,6 @@
-{
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  wipe-linux = pkgs.writeShellScriptBin "wipe-linux" ''
+  script = writeShellScript "wipe-linux" ''
     set -e
 
     warn() {
@@ -56,12 +52,14 @@ let
     main && exit 0
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "wipe-linux";
   src = ./.;
-  buildInputs = [ wipe-linux ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${wipe-linux}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

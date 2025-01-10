@@ -1,10 +1,10 @@
 {
-  pkgs,
+  gh,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  cop = pkgs.writeShellScriptBin "cop" ''
+  script = writeShellScript "cop" ''
     parse_args() {
       if [[ $# -eq 0 ]]; then
         args=("--help"); export args
@@ -24,7 +24,7 @@ let
     }
 
     gh_copilot() {
-      command gh copilot "''${args[@]}"
+      gh copilot "''${args[@]}"
     }
 
     main() {
@@ -35,12 +35,16 @@ let
     main "''${@}"; exit
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "cop";
   src = ./.;
-  buildInputs = [ cop ];
+
+  nativeBuildInputs = [ gh ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${cop}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

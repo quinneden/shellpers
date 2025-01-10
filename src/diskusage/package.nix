@@ -1,10 +1,10 @@
 {
-  pkgs,
+  ncdu,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  diskusage = pkgs.writeShellScriptBin "diskusage" ''
+  script = writeShellScript "diskusage" ''
     ncdu_root() {
       test_file=$(ncdu -f /tmp/ncdu_root.json -o- &>/dev/null && echo OK)
       if [[ -e /tmp/ncdu_root.json ]]; then
@@ -83,12 +83,16 @@ let
     main "$@" || exit 1
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "diskusage";
   src = ./.;
-  buildInputs = [ diskusage ];
+
+  nativeBuildInputs = [ ncdu ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${diskusage}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

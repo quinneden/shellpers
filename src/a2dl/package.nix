@@ -1,5 +1,5 @@
 {
-  pkgs,
+  aria2,
   stdenv,
   writeShellScript,
 }:
@@ -14,14 +14,18 @@ let
     fi
   '';
 in
-stdenv.mkDerivation {
-  pname = "a2dl";
+stdenv.mkDerivation rec {
+  name = "a2dl";
+  version = "1.0.0";
+
   src = ./.;
 
-  nativeBuildInputs = [ pkgs.aria2 ];
+  nativeBuildInputs = [ aria2 ];
 
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    install -m 755 ${script} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

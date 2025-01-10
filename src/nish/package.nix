@@ -1,10 +1,6 @@
-{
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  nish = pkgs.writeShellScriptBin "nish" ''
+  script = writeShellScript "nish" ''
     parse_args() {
       if [[ $# -ge 1 ]]; then
         if [[ $1 =~ -.$ ]]; then
@@ -56,12 +52,14 @@ let
     nish_command "$@"; exit
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "nish";
   src = ./.;
-  buildInputs = [ nish ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${nish}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

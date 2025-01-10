@@ -1,12 +1,10 @@
 {
-  lib,
-  pkgs,
+  nh,
   stdenv,
   writeShellScript,
-  ...
 }:
 let
-  nix-clean = writeShellScript "nix-clean" ''
+  script = writeShellScript "nix-clean" ''
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
     }
@@ -59,13 +57,16 @@ let
     nh clean all --ask "''${flags[@]}"
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "nix-clean";
   src = ./.;
-  nativeBuildInputs = [ pkgs.nh ];
-  buildInputs = [ nix-clean ];
+
+  nativeBuildInputs = [ nh ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe nix-clean} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

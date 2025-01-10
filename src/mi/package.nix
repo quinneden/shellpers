@@ -1,28 +1,30 @@
 {
-  lib,
-  pkgs,
+  micro,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  mi = pkgs.writeShellScriptBin "mi" (
+  script = writeShellScript "mi" (
     if stdenv.isLinux then
       ''
-        echo -ne '\e[6 q'; ${lib.getExe pkgs.micro} "$@"; echo -ne '\e[6 q'
+        echo -ne '\e[6 q'; micro "$@"; echo -ne '\e[6 q'
       ''
     else
       ''
-        ${lib.getExe pkgs.micro} "$@"
+        micro "$@"
       ''
   );
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "mi";
   src = ./.;
-  nativeBuildInputs = [ pkgs.micro ];
-  buildInputs = [ mi ];
+
+  nativeBuildInputs = [ micro ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe mi} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

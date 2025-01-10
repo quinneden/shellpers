@@ -1,11 +1,10 @@
 {
-  lib,
-  pkgs,
+  nixos-rebuild,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  nixos-deploy = pkgs.writeShellScriptBin "nixos-deploy" ''
+  script = writeShellScript "nixos-deploy" ''
     if [[ $# -eq 2 ]]; then
       flakeref="$1"
       target="$2"
@@ -15,15 +14,19 @@ let
 
     [[ $target =~ 'root' ]] || IF_NOT_ROOT="--use-remote-sudo"
 
-    "${lib.getExe pkgs.nixos-rebuild}" switch --fast --show-trace --flake "$flakeref" --target-host "$target" $IF_NOT_ROOT
+    nixos-rebuild switch --fast --show-trace --flake "$flakeref" --target-host "$target" $IF_NOT_ROOT
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "nixos-deploy";
   src = ./.;
-  buildInputs = [ nixos-deploy ];
+
+  nativeBuildInputs = [ nixos-rebuild ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${nixos-deploy}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

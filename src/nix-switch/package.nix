@@ -1,22 +1,19 @@
-{
-  pkgs,
-  stdenv,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  nix-switch = pkgs.writeShellScriptBin "nix-switch" ''
+  script = writeShellScript "nix-switch" ''
     FLAKE="$HOME/.dotfiles"
     HOSTNAME="$(hostname)"
-
-    ${pkgs.nh}/bin/nh os switch "$@"
+    nh os switch "$@"
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "nix-switch";
   src = ./.;
-  buildInputs = [ nix-switch ];
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${nix-switch}/bin/* $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

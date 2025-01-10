@@ -1,12 +1,6 @@
-{
-  lib,
-  pkgs,
-  stdenv,
-  writeShellScriptBin,
-  ...
-}:
+{ stdenv, writeShellScript }:
 let
-  swatch = writeShellScriptBin "swatch" ''
+  script = writeShellScript "swatch" ''
     if [ -z "$1" ]; then
       echo "Usage: swatch <hex_color_code>"
       return 1
@@ -26,16 +20,14 @@ let
     echo -e "              $ansi_escape"
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "swatch";
   src = ./.;
 
-  buildInputs = [
-    swatch
-  ];
-
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe swatch} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

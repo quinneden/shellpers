@@ -1,11 +1,11 @@
 {
-  lib,
-  pkgs,
+  bat,
+  glow,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  readme = pkgs.writeShellScriptBin "readme" ''
+  script = writeShellScript "readme" ''
     if [[ -n $1 ]]
     then
     	readme_file="$1"
@@ -28,18 +28,19 @@ let
     fi
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "readme";
   src = ./.;
 
-  nativeBuildInputs = with pkgs; [
+  nativeBuildInputs = [
     bat
     glow
   ];
 
-  buildInputs = [ readme ];
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe readme} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }

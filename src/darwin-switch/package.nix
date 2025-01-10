@@ -1,11 +1,10 @@
 {
-  lib,
-  pkgs,
+  nh,
   stdenv,
-  ...
+  writeShellScript,
 }:
 let
-  darwin-switch = pkgs.writeShellScriptBin "darwin-switch" ''
+  script = writeShellScript "darwin-switch" ''
     if [[ ! -d $HOME/.dotfiles ]]; then
       echo "error: $HOME/.dotfiles: directory not found" >&2
       exit 1
@@ -14,17 +13,16 @@ let
     nh darwin switch --hostname macos -- "$@"
   '';
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "darwin-switch";
-
   src = ./.;
 
-  nativeBuildInputs = [ pkgs.nh ];
-
-  buildInputs = [ darwin-switch ];
+  nativeBuildInputs = [ nh ];
 
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/bin
-    cp ${lib.getExe darwin-switch} $out/bin
+    install -m 755 ${script} $out/bin/${name}
+    runHook postInstall
   '';
 }
