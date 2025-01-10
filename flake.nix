@@ -2,11 +2,11 @@
   description = "Various shell script tools. Some opinionated.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs =
-    { nixpkgs, self }:
+    { nixpkgs, self, ... }:
     let
       forEachSystem =
         function:
@@ -27,65 +27,63 @@
     in
     {
       overlays = rec {
-        nix-shell-scripts = import ./src/overlay.nix;
+        nix-shell-scripts = import ./src/overlay.nix { };
         default = nix-shell-scripts;
       };
 
       packages = forEachSystem (pkgs: {
-        nix-shell-scripts = {
-          inherit (pkgs)
-            a2dl
-            alphabetize
-            cfg
-            clone
-            colortable
-            commit
-            cop
-            darwin-switch
-            diskusage
-            del
-            lsh
-            mi
-            nish
-            nix-clean
-            nix-switch
-            nixhash
-            nixos-deploy
-            readme
-            rm-result
-            swatch
-            wipe-linux
-            ;
+        inherit (pkgs)
+          a2dl
+          alphabetize
+          cfg
+          clone
+          colortable
+          commit
+          cop
+          darwin-switch
+          diskusage
+          del
+          lsh
+          mi
+          nish
+          nix-clean
+          nix-switch
+          nixhash
+          nixos-deploy
+          readme
+          rm-result
+          swatch
+          wipe-linux
+          ;
 
-          metapackage =
-            with pkgs;
-            buildEnv {
-              name = "metapackage";
-              paths = [
-                a2dl
-                alphabetize
-                cfg
-                clone
-                colortable
-                commit
-                cop
-                darwin-switch
-                diskusage
-                del
-                lsh
-                mi
-                nish
-                nix-clean
-                nix-switch
-                nixhash
-                nixos-deploy
-                readme
-                rm-result
-                swatch
-                wipe-linux
-              ];
-            };
-        };
+        metapackage =
+          with pkgs;
+          buildEnv {
+            name = "metapackage";
+            paths = [
+              a2dl
+              alphabetize
+              cfg
+              clone
+              colortable
+              commit
+              cop
+              darwin-switch
+              diskusage
+              del
+              lsh
+              mi
+              nish
+              nix-clean
+              nix-switch
+              nixhash
+              nixos-deploy
+              readme
+              rm-result
+              swatch
+              wipe-linux
+            ];
+          };
       });
 
       apps = forEachSystem (pkgs: rec {
