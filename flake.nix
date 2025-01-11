@@ -27,7 +27,7 @@
     in
     {
       overlays = rec {
-        nix-shell-scripts = import ./src/overlay.nix { };
+        nix-shell-scripts = import ./src/overlay.nix;
         default = nix-shell-scripts;
       };
 
@@ -60,7 +60,7 @@
           with pkgs;
           buildEnv {
             name = "metapackage";
-            paths = [
+            paths = with nix-shell-scripts; [
               a2dl
               alphabetize
               cfg
