@@ -61,7 +61,7 @@ stdenv.mkDerivation rec {
   name = "nix-clean";
   src = ./.;
 
-  nativeBuildInputs = [ nh ];
+  buildInputs = [ nh ];
 
   installPhase = ''
     runHook preInstall

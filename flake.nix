@@ -3,10 +3,16 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nh.url = "github:viperml/nh";
   };
 
   outputs =
-    { nixpkgs, self, ... }:
+    {
+      nh,
+      nixpkgs,
+      self,
+      ...
+    }:
     let
       forEachSystem =
         function:
@@ -20,7 +26,10 @@
             function (
               import nixpkgs {
                 inherit system;
-                overlays = [ self.overlays.default ];
+                overlays = [
+                  self.overlays.default
+                  nh.overlays.default
+                ];
               }
             )
           );
@@ -101,8 +110,8 @@
               runtimeInputs = [ cachix ];
               text = ''
                 cachix push quinneden < <(
-                  nix build --no-link --print-out-paths .#packages.nix-shell-scripts.aarch64-darwin.metapackage
-                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.nix-shell-scripts.aarch64-darwin.metapackage"}
+                  nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
+                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
                 )
               '';
             });
