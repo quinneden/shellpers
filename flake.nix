@@ -32,7 +32,7 @@
       };
 
       packages = forEachSystem (pkgs: {
-        inherit (pkgs)
+        inherit (pkgs.nix-shell-scripts)
           a2dl
           alphabetize
           cfg

@@ -1,11 +1,22 @@
 {
+  coreutils,
+  lib,
   stdenv,
-  writeText,
+  trash-cli,
+  writeScript,
   writeShellScript,
   installShellFiles,
 }:
+with lib;
 let
+  binPath = makeBinPath [
+    coreutils
+    trash-cli
+  ];
+
   del = writeShellScript "del" ''
+    PATH="${binPath}:$PATH"; export PATH
+
     parse_args() {
       for f in "''${@}"; do
         if [[ -L $f ]]; then
@@ -31,7 +42,7 @@ let
     }
 
     trash_files() {
-      owner=$(stat -c '%u' $f)
+      owner=$(stat -c%u $f)
 
       if [[ -n ''${files} ]]; then
         for f in "''${files[@]}"; do
@@ -84,6 +95,8 @@ let
   '';
 
   undel = writeShellScript "undel" ''
+    PATH=${binPath}:$PATH; export PATH
+
     parse_args() {
       args=()
       restore=()
@@ -116,7 +129,7 @@ let
     main "$@" || exit 1
   '';
 
-  undelCompletion = writeText "_undel" (
+  undelCompletion = writeScript "_undel" (
     if stdenv.isDarwin then
       ''
         #compdef undel udel
@@ -160,7 +173,6 @@ stdenv.mkDerivation rec {
 
     install -m 755 ${del} $out/bin/del
     install -m 755 ${undel} $out/bin/undel
-
     ln -s $out/bin/undel $out/bin/udel
 
     installShellCompletion --zsh ${undelCompletion}
