@@ -14,7 +14,7 @@ let
           sudo ncdu -0 --enable-delete -f /tmp/ncdu_root.json
         fi
       else
-        sudo ncdu --enable-delete -t8 --si -1x -o- / | sudo tee /tmp/ncdu_root.json | sudo ncdu -f-
+        sudo ncdu -t8 --si -1x -o- / | sudo tee /tmp/ncdu_root.json | sudo ncdu -f- --enable-delete
       fi
     }
 

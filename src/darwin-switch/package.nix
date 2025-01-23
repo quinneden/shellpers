@@ -10,7 +10,7 @@ let
       exit 1
     fi
 
-    nh darwin switch --hostname macos -- "$@"
+    nh darwin switch -- "$@"
   '';
 in
 stdenv.mkDerivation rec {
