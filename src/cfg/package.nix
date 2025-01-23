@@ -13,7 +13,7 @@ let
     elif [[ $pos =~ (nixos|darwin|home-manager)(/[[:alnum:]]+)? ]]; then
       pat="$pos"
     else
-      pat="($system|home-manager)/(.+/)?$pos"
+      pat="(hosts|$system|home-manager)/(.+/)?$pos"
     fi
 
     mapfile -t files_matched < <(
