@@ -1,5 +1,4 @@
 {
-  bat,
   glow,
   stdenv,
   writeShellScript,
@@ -23,7 +22,6 @@ let
     	echo "error: file not found"
     	exit 1
     else
-    	PAGER="bat --file-name $(basename $readme_file)"
     	glow "$readme_file"
     fi
   '';
@@ -32,10 +30,7 @@ stdenv.mkDerivation rec {
   name = "readme";
   src = ./.;
 
-  nativeBuildInputs = [
-    bat
-    glow
-  ];
+  buildInputs = [ glow ];
 
   installPhase = ''
     runHook preInstall

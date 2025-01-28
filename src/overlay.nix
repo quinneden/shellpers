@@ -1,25 +1,25 @@
 final: prev: {
   nix-shell-scripts = {
-    a2dl = final.callPackage ./a2dl/package.nix { };
-    alphabetize = final.callPackage ./alphabetize/package.nix { };
-    cfg = final.callPackage ./cfg/package.nix { };
-    clone = final.callPackage ./clone/package.nix { };
-    colortable = final.callPackage ./colortable/package.nix { };
-    commit = final.callPackage ./commit/package.nix { };
-    cop = final.callPackage ./cop/package.nix { };
-    darwin-switch = final.callPackage ./darwin-switch/package.nix { };
-    diskusage = final.callPackage ./diskusage/package.nix { };
-    del = final.callPackage ./del/package.nix { };
-    lsh = final.callPackage ./lsh/package.nix { };
-    mi = final.callPackage ./mi/package.nix { };
-    nish = final.callPackage ./nish/package.nix { };
-    nix-clean = final.callPackage ./nix-clean/package.nix { };
-    nix-switch = final.callPackage ./nix-switch/package.nix { };
-    nixhash = final.callPackage ./nixhash/package.nix { };
-    nixos-deploy = final.callPackage ./nixos-deploy/package.nix { };
-    readme = final.callPackage ./readme/package.nix { };
-    rm-result = final.callPackage ./rm-result/package.nix { };
-    swatch = final.callPackage ./swatch/package.nix { };
-    wipe-linux = final.callPackage ./wipe-linux/package.nix { };
+    a2dl = prev.callPackage ./a2dl/package.nix { };
+    alphabetize = prev.callPackage ./alphabetize/package.nix { };
+    cfg = prev.callPackage ./cfg/package.nix { };
+    clone = prev.callPackage ./clone/package.nix { };
+    colortable = prev.callPackage ./colortable/package.nix { };
+    commit = prev.callPackage ./commit/package.nix { };
+    cop = prev.callPackage ./cop/package.nix { };
+    darwin-switch = prev.callPackage ./darwin-switch/package.nix { };
+    diskusage = prev.callPackage ./diskusage/package.nix { };
+    del = prev.callPackage ./del/package.nix { };
+    lsh = prev.callPackage ./lsh/package.nix { };
+    mi = prev.callPackage ./mi/package.nix { };
+    nish = prev.callPackage ./nish/package.nix { };
+    nix-clean = prev.callPackage ./nix-clean/package.nix { };
+    nix-switch = prev.callPackage ./nix-switch/package.nix { };
+    nixhash = prev.callPackage ./nixhash/package.nix { };
+    nixos-deploy = prev.callPackage ./nixos-deploy/package.nix { };
+    readme = prev.callPackage ./readme/package.nix { };
+    rm-result = prev.callPackage ./rm-result/package.nix { };
+    swatch = prev.callPackage ./swatch/package.nix { };
+    wipe-linux = prev.callPackage ./wipe-linux/package.nix { };
   };
 }

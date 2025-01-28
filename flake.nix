@@ -1,5 +1,5 @@
 {
-  description = "Various shell script tools. Some opinionated.";
+  description = "Various shell scripts I use. Some opinionated.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,7 +15,7 @@
     }:
     let
       forEachSystem =
-        function:
+        f:
         nixpkgs.lib.genAttrs
           [
             "aarch64-darwin"
@@ -23,7 +23,7 @@
           ]
           (
             system:
-            function (
+            f (
               import nixpkgs {
                 inherit system;
                 overlays = [
@@ -100,7 +100,6 @@
         cacheout =
           let
             inherit (pkgs) writeShellApplication cachix lib;
-            inherit (pkgs.stdenv) isDarwin;
           in
           with lib;
           {
@@ -110,8 +109,8 @@
               runtimeInputs = [ cachix ];
               text = ''
                 cachix push quinneden < <(
+                  nix build --no-link --print-out-paths .#packages.aarch64-linux.metapackage
                   nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
-                  ${optionalString isDarwin "nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
                 )
               '';
             });
