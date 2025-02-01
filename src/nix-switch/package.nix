@@ -1,7 +1,6 @@
 { stdenv, writeShellScript }:
 let
   script = writeShellScript "nix-switch" ''
-    NH_FLAKE="$HOME/.dotfiles"
     nh os switch --hostname "nixos-macmini" -- "$@"
   '';
 in
