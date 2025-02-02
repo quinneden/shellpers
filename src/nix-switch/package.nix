@@ -1,13 +1,13 @@
 {
   lib,
-  nh,
+  pkgs,
   stdenv,
   writeShellApplication,
 }:
 let
   script = writeShellApplication {
     name = "nix-switch";
-    runtimeInputs = [ nh ];
+    runtimeInputs = [ pkgs.nh ];
     text = ''
       NH_FLAKE="''${NH_FLAKE:-$HOME/.dotfiles}"
       REF=$(
@@ -24,12 +24,11 @@ with lib;
 
 stdenv.mkDerivation rec {
   name = "nix-switch";
-  src = ./.;
+  src = script;
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin
-    install -m 755 ${getExe script} $out/bin/${name}
+    install -Dm 755 "bin/${name}" "$out/bin/${name}"
     runHook postInstall
   '';
 }

@@ -28,7 +28,7 @@
                 inherit system;
                 overlays = [
                   self.overlays.default
-                  nh.overlays.default
+                  (final: prev: { nh = if (system == "aarch64-darwin") then nh.packages.${system}.nh else prev.nh; })
                 ];
               }
             )

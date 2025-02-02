@@ -17,6 +17,8 @@ stdenv.mkDerivation rec {
   name = "darwin-switch";
   src = ./.;
 
+  buildInputs = [ nh ];
+
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
