@@ -15,7 +15,7 @@ let
         | jq -r '.nixosConfigurations | to_entries | .[].key'
       )
 
-      nh os switch --hostname "$REF" "$@"
+      nh os switch --hostname "$REF" "$NH_FLAKE" -- "$@"
     '';
   };
 in
