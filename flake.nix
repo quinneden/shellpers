@@ -28,15 +28,14 @@
                 inherit system;
                 overlays = [
                   self.overlays.default
-                  (final: prev: { nh = if (system == "aarch64-darwin") then nh.packages.${system}.nh else prev.nh; })
-                ];
+                ] ++ (nixpkgs.lib.optional (system == "aarch64-darwin") nh.overlays.default);
               }
             )
           );
     in
     {
       overlays = rec {
-        nix-shell-scripts = import ./src/overlay.nix;
+        nix-shell-scripts = import ./scripts/overlay.nix;
         default = nix-shell-scripts;
       };
 
@@ -99,7 +98,12 @@
         default = cacheout;
         cacheout =
           let
-            inherit (pkgs) writeShellApplication cachix lib;
+            inherit (pkgs)
+              writeShellApplication
+              cachix
+              lib
+              stdenv
+              ;
           in
           with lib;
           {
@@ -109,8 +113,8 @@
               runtimeInputs = [ cachix ];
               text = ''
                 cachix push quinneden < <(
+                  ${optionalString stdenv.isDarwin "nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
                   nix build --no-link --print-out-paths .#packages.aarch64-linux.metapackage
-                  nix build --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
                 )
               '';
             });
