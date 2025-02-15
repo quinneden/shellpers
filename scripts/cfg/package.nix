@@ -1,19 +1,33 @@
-{ stdenv, writeShellScript }:
+{
+  gawk,
+  fd,
+  lib,
+  micro,
+  stdenv,
+  writeShellScript,
+}:
 let
-  inherit (stdenv) isDarwin;
-  forSystem = if isDarwin then "darwin" else "nixos";
+  binPath = lib.makeBinPath [
+    gawk
+    fd
+    micro
+  ];
+
+  platform = if stdenv.isDarwin then "darwin" else "nixos";
 
   script = writeShellScript "cfg" ''
+    PATH="${binPath}:$PATH"
+
     dotdir="$HOME/.dotfiles"
     pos="''${1:-}"
-    system="${forSystem}"
+    system="${platform}"
 
     if [[ -z $pos ]]; then
       pat="flake.nix"
-    elif [[ $pos =~ (nixos|darwin|home-manager)(/[[:alnum:]]+)? ]]; then
+    elif [[ $pos =~ (hosts|home|overlays|pkgs|modules)(/[[:alnum:]]+)? ]]; then
       pat="$pos"
     else
-      pat="(hosts|$system|home-manager)/(.+/)?$pos"
+      pat="(hosts|home|overlays|pkgs|modules)/(.+/)?$pos"
     fi
 
     mapfile -t files_matched < <(

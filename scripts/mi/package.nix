@@ -1,25 +1,31 @@
 {
+  lib,
   micro,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ micro ];
+
   script = writeShellScript "mi" (
-    if stdenv.isLinux then
-      ''
-        echo -ne '\e[6 q'; micro "$@"; echo -ne '\e[6 q'
-      ''
-    else
-      ''
-        micro "$@"
-      ''
+    ''
+      PATH="${binPath}:$PATH"
+    ''
+    + (
+      if stdenv.isLinux then
+        ''
+          echo -ne '\e[6 q'; micro "$@"; echo -ne '\e[6 q'
+        ''
+      else
+        ''
+          micro "$@"
+        ''
+    )
   );
 in
 stdenv.mkDerivation rec {
   name = "mi";
   src = ./.;
-
-  nativeBuildInputs = [ micro ];
 
   installPhase = ''
     runHook preInstall

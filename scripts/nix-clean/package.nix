@@ -1,10 +1,15 @@
 {
+  lib,
   nh,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ nh ];
+
   script = writeShellScript "nix-clean" ''
+    PATH=${binPath}:$PATH
+
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
     }
@@ -60,8 +65,6 @@ in
 stdenv.mkDerivation rec {
   name = "nix-clean";
   src = ./.;
-
-  buildInputs = [ nh ];
 
   installPhase = ''
     runHook preInstall

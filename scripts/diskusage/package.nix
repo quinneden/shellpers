@@ -1,10 +1,15 @@
 {
+  lib,
   ncdu,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ ncdu ];
+
   script = writeShellScript "diskusage" ''
+    PATH="${binPath}:$PATH"
+
     ncdu_root() {
       test_file=$(ncdu -f /tmp/ncdu_root.json -o- &>/dev/null && echo OK)
       if [[ -e /tmp/ncdu_root.json ]]; then
@@ -86,8 +91,6 @@ in
 stdenv.mkDerivation rec {
   name = "diskusage";
   src = ./.;
-
-  nativeBuildInputs = [ ncdu ];
 
   installPhase = ''
     runHook preInstall

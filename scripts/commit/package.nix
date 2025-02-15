@@ -1,6 +1,17 @@
-{ stdenv, writeShellScript }:
+{
+  jq,
+  lib,
+  stdenv,
+  writeShellScript,
+}:
 let
+  binPath = lib.makeBinPath [ jq ];
+
   script = writeShellScript "commit" ''
+    PATH="${binPath}:$PATH"
+
+    trap 'rm -f $tmp $msg' EXIT
+
     git_status_json() {
       # Declare an associative array to store files by status
       declare -A status_files
@@ -94,7 +105,7 @@ let
       msg=$(mktemp -p /tmp git-commit-msg.XXXXXXXXX)
 
       if [[ -n $git_status ]]; then
-        (git_status_json | jq) > $tmp
+        git_status_json > $tmp
       else
         echo 'Nothing to commit'; exit 0
       fi
@@ -109,7 +120,7 @@ let
       fi
     }
 
-    main; rm -f $tmp $msg; exit
+    main && exit 0
   '';
 in
 stdenv.mkDerivation rec {

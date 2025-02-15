@@ -1,5 +1,4 @@
 {
-  nixos-rebuild,
   stdenv,
   writeShellScript,
 }:
@@ -20,8 +19,6 @@ in
 stdenv.mkDerivation rec {
   name = "nixos-deploy";
   src = ./.;
-
-  nativeBuildInputs = [ nixos-rebuild ];
 
   installPhase = ''
     runHook preInstall

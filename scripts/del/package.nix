@@ -160,7 +160,7 @@ let
       ''
   );
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "del";
   src = ./.;
 

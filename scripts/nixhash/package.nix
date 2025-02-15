@@ -1,10 +1,9 @@
 {
-  nix,
   stdenv,
   writeShellScript,
 }:
 let
-  copyToPb = if stdenv.isLinux then "wl-copy" else "pbcopy";
+  copyToPb = if stdenv.isDarwin then "pbcopy" else "wl-copy";
 
   script = writeShellScript "nixhash" ''
     usage() {
@@ -92,8 +91,6 @@ in
 stdenv.mkDerivation rec {
   name = "nixhash";
   src = ./.;
-
-  nativeBuildInputs = [ nix ];
 
   installPhase = ''
     runHook preInstall

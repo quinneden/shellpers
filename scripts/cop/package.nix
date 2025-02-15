@@ -1,10 +1,15 @@
 {
   gh,
+  lib,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ gh ];
+
   script = writeShellScript "cop" ''
+    PATH="${binPath}:$PATH"
+
     parse_args() {
       if [[ $# -eq 0 ]]; then
         args=("--help"); export args
@@ -38,8 +43,6 @@ in
 stdenv.mkDerivation rec {
   name = "cop";
   src = ./.;
-
-  nativeBuildInputs = [ gh ];
 
   installPhase = ''
     runHook preInstall

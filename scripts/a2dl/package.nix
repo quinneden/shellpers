@@ -1,10 +1,15 @@
 {
   aria2,
+  lib,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ aria2 ];
+
   script = writeShellScript "a2dl" ''
+    PATH="${binPath}:$PATH"
+
     URL="$1"
     if [[ "$URL" =~ ^http[s]*:// ]]; then
       output_dir="''${2:-$PWD}"
@@ -16,11 +21,7 @@ let
 in
 stdenv.mkDerivation rec {
   name = "a2dl";
-  version = "1.0.0";
-
   src = ./.;
-
-  nativeBuildInputs = [ aria2 ];
 
   installPhase = ''
     runHook preInstall

@@ -1,10 +1,15 @@
 {
+  lib,
   nh,
   stdenv,
   writeShellScript,
 }:
 let
+  binPath = lib.makeBinPath [ nh ];
+
   script = writeShellScript "darwin-switch" ''
+    PATH=${binPath}:$PATH
+
     if [[ ! -d $HOME/.dotfiles ]]; then
       echo "error: $HOME/.dotfiles: directory not found" >&2
       exit 1
@@ -16,8 +21,6 @@ in
 stdenv.mkDerivation rec {
   name = "darwin-switch";
   src = ./.;
-
-  buildInputs = [ nh ];
 
   installPhase = ''
     runHook preInstall
