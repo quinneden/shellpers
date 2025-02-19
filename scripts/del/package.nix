@@ -7,12 +7,19 @@
   writeShellScript,
   installShellFiles,
 }:
+
 with lib;
+
 let
   binPath = makeBinPath [
     coreutils
     trash-cli
   ];
+
+  trashEmpty = "trash-empty -f" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
+  trashPut = "trash-put -f" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
+  trashRestore = "trash-restore" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
+  trashDir = if stdenv.isDarwin then "~/.Trash" else "~/.local/share/trash";
 
   del = writeShellScript "del" ''
     PATH="${binPath}:$PATH"; export PATH
@@ -47,9 +54,9 @@ let
       if [[ -n ''${files} ]]; then
         for f in "''${files[@]}"; do
           if [[ $owner -eq 0 ]]; then
-            eval sudo $trash_cmd "$f"
+            eval sudo ${trashPut} "$f"
           else
-            eval $trash_cmd "$f"
+            eval ${trashPut} "$f"
           fi
         done
       fi
@@ -62,9 +69,9 @@ let
 
     empty_trash() {
       if [[ $EMPTY_NOW -eq 1 ]]; then
-        (($trash_empty_cmd &>/dev/null) &)
+        ((${trashEmpty} &>/dev/null) &)
       else
-        ((sleep 180 && $trash_empty_cmd &>/dev/null) &)
+        ((sleep 300 && ${trashEmpty} &>/dev/null) &)
       fi
     }
 
@@ -72,26 +79,31 @@ let
       local files=()
       local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
 
-      if [[ $(uname) == 'Linux' ]]; then
-        local trash_cmd="trash-put -f"
-        local trash_empty_cmd="trash-empty -f"
-      else
-        TRASHDIR="$HOME/.Trash"
-        local trash_cmd="trash-put --trash-dir $TRASHDIR -f"
-        local trash_empty_cmd="trash-empty --trash-dir $TRASHDIR -f"
-      fi
-
-      if [[ $1 == '-e' ]]; then
-        shift
-        local EMPTY_NOW=1
-      fi
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          -e|--empty)
+            EMPTY_NOW=1
+            shift
+            ;;
+          -h|--help)
+            echo "Usage: del [OPTIONS] [FILES]"
+            echo "Options:"
+            echo "  -e, --empty  Empty the trash immediately after deletion"
+            echo "  -h, --help   Display this help message"
+            exit 0
+            ;;
+          *)
+            break
+            ;;
+        esac
+      done
 
       parse_args "''${@}"
       trash_files
       empty_trash
     }
 
-    main "''${@}" || exit 1
+    main "''${@}" && exit 0
   '';
 
   undel = writeShellScript "undel" ''
@@ -103,8 +115,8 @@ let
       if [[ $# -ge 1 ]]; then
         for i in "''${@}"; do args+=("$(basename $i)"); done
         for arg in "''${args[@]}"; do
-          if [[ -f $TRASHDIR/info/$arg.trashinfo ]]; then
-            orig_path=$(awk -F'='  '/Path/ {print $2}' < $TRASHDIR/info/$arg.trashinfo)
+          if [[ -f ${trashDir}/info/$arg.trashinfo ]]; then
+            orig_path=$(awk -F'='  '/Path/ {print $2}' < ${trashDir}/info/"$arg.trashinfo")
             restore+=("$orig_path")
           fi
         done
@@ -112,54 +124,31 @@ let
     }
 
     main() {
-      if [[ $(uname) == 'Darwin' ]]; then
-        TRASHDIR="$HOME/.Trash"
-        trash_restore_cmd="trash-restore --trash-dir $HOME/.Trash"
-      else
-        trash_restore_cmd="trash-restore"
-      fi
-
       parse_args "$@"
 
       for f in "''${restore[@]}"; do
-        eval $trash_restore_cmd "$f" <<<'0' >/dev/null
+        eval ${trashRestore} "$f" <<<'0' >/dev/null
       done
     }
 
-    main "$@" || exit 1
+    main "$@" && exit 0
   '';
 
-  undelCompletion = writeScript "_undel" (
-    if stdenv.isDarwin then
-      ''
-        #compdef undel udel
+  undelCompletion = writeScript "_undel" ''
+    #compdef undel udel
 
-        _undel() {
-          _files -W ~/.Trash/files/
-        }
+    _undel() {
+      _files -W ${trashDir}/files/
+    }
 
-        if [ "$funcstack[1]" = "_undel" ]; then
-            _undel "$@"
-        else
-            compdef _undel undel udel
-        fi
-      ''
+    if [ "$funcstack[1]" = "_undel" ]; then
+        _undel "$@"
     else
-      ''
-        #compdef undel udel
-
-        _undel() {
-          _files -W ~/.local/share/trash/files/
-        }
-
-        if [ "$funcstack[1]" = "_undel" ]; then
-            _undel "$@"
-        else
-            compdef _undel undel udel
-        fi
-      ''
-  );
+        compdef _undel undel udel
+    fi
+  '';
 in
+
 stdenv.mkDerivation {
   name = "del";
   src = ./.;
@@ -169,11 +158,12 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin
+    install -Dm755 ${del} $out/bin/del
+    install -Dm755 ${undel} $out/bin/undel
 
-    install -m 755 ${del} $out/bin/del
-    install -m 755 ${undel} $out/bin/undel
-    ln -s $out/bin/undel $out/bin/udel
+    pushd $out/bin >/dev/null
+    ln -s undel udel
+    popd >/dev/null
 
     installShellCompletion --zsh ${undelCompletion}
 
