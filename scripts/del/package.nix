@@ -16,94 +16,94 @@ let
     trash-cli
   ];
 
-  trashEmpty = "trash-empty -f" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
-  trashPut = "trash-put -f" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
-  trashRestore = "trash-restore" + (optionalString stdenv.isDarwin " --trash-dir ~/.Trash");
-  trashDir = if stdenv.isDarwin then "~/.Trash" else "~/.local/share/trash";
+  # trashEmpty = "trash-empty -f" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
+  # trashPut = "trash-put -f" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
+  # trashRestore = "trash-restore" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
+  # trashDir = if stdenv.isDarwin then "$HOME/.Trash" else "$HOME/.local/share/trash";
+
+  trashDir = "$HOME/.local/share/Trash";
+  trashEmpty = "trash-empty -f";
+  trashPut = "trash-put -f";
+  trashRestore = "trash-restore";
 
   del = writeShellScript "del" ''
     PATH="${binPath}:$PATH"; export PATH
 
-    parse_args() {
-      for f in "''${@}"; do
-        if [[ -L $f ]]; then
-          abs_symlink=$(realpath -s $f)
-          files+=("$abs_symlink")
-        elif [[ ! -L $f && -e $f ]]; then
-          abs_path=$(realpath -q $f)
-          files+=("$abs_path")
-        else
-          echo "error: $f: path does not exist"
-          exit 1
+    ${optionalString stdenv.isDarwin ''
+      if ! [[ -L ${trashDir}/files ]]; then
+        rm -rf ${trashDir}
+        mkdir -p ${trashDir}
+        ln -s $HOME/.Trash ${trashDir}/files
+      fi
+    ''}
+
+    files=()
+    PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
+    EMPTY_NOW=false
+
+    parse_arg() {
+      if [[ -L $1 ]]; then
+        abs_symlink=$(realpath -s $1)
+        files+=("$abs_symlink")
+      elif [[ ! -L $1 && -e $1 ]]; then
+        abs_path=$(realpath -q $1)
+        files+=("$abs_path")
+      else
+        echo "error: $1: path does not exist"
+      fi
+    }
+
+    show_help() {
+      echo "Usage: del [OPTIONS] [FILES]"
+      echo "Options:"
+      echo "  -e, --empty    Empty the trash immediately after trashing files"
+      echo "  -h, --help     Show this help message"
+    }
+
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        -e|--empty)
+          EMPTY_NOW=true
+          shift
+          ;;
+        -h|--help)
+          show_help
+          exit 0
+          ;;
+        *)
+          parse_arg "$1"
+          shift
+          ;;
+      esac
+    done
+
+    for p in "''${PROTECT[@]}"; do
+      for f in "''${files[@]}"; do
+        if [[ $f =~ $p ]]; then
+          echo "error: cannot delete protected file or directory: $1"
+          files=("''${files[@]/$f}")
         fi
       done
+    done
 
-      for i in "''${PROTECT[@]}"; do
-        for f in "''${files[@]}"; do
-          if [[ $f =~ $i ]]; then
-            echo "error: cannot delete protected file or directory: $f"
-            exit 1
-          fi
-        done
+    if [[ -n $files ]]; then
+      for f in "''${files[@]}"; do
+        (${trashPut} "$f" || sudo ${trashPut} "$f") &>/dev/null
       done
-    }
+    else
+      exit 0
+    fi
 
-    trash_files() {
-      owner=$(stat -c%u $f)
+    echo "Deleted:"
+    for f in "''${files[@]}"; do
+      echo "    $(basename $f)"
+    done
 
-      if [[ -n ''${files} ]]; then
-        for f in "''${files[@]}"; do
-          if [[ $owner -eq 0 ]]; then
-            eval sudo ${trashPut} "$f"
-          else
-            eval ${trashPut} "$f"
-          fi
-        done
-      fi
-
-      if [[ $? -eq 0 ]]; then
-        local LIST_DEL=$(for f in "''${files[@]}"; do printf "  $(basename $f)\n"; done)
-        printf "Deleted:\n$LIST_DEL\n"
-      fi
-    }
-
-    empty_trash() {
-      if [[ $EMPTY_NOW -eq 1 ]]; then
-        ((${trashEmpty} &>/dev/null) &)
-      else
-        ((sleep 300 && ${trashEmpty} &>/dev/null) &)
-      fi
-    }
-
-    main() {
-      local files=()
-      local PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
-
-      while [[ $# -gt 0 ]]; do
-        case "$1" in
-          -e|--empty)
-            EMPTY_NOW=1
-            shift
-            ;;
-          -h|--help)
-            echo "Usage: del [OPTIONS] [FILES]"
-            echo "Options:"
-            echo "  -e, --empty  Empty the trash immediately after deletion"
-            echo "  -h, --help   Display this help message"
-            exit 0
-            ;;
-          *)
-            break
-            ;;
-        esac
-      done
-
-      parse_args "''${@}"
-      trash_files
-      empty_trash
-    }
-
-    main "''${@}" && exit 0
+    if $EMPTY_NOW; then
+      ((${trashEmpty} &>/dev/null) &)
+    else
+      ((sleep 300 && ${trashEmpty} &>/dev/null) &)
+    fi
   '';
 
   undel = writeShellScript "undel" ''

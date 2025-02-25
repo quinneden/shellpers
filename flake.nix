@@ -49,7 +49,7 @@
           metapackage =
             with pkgs;
             buildEnv {
-              name = "metapackage";
+              name = "nix-shell-scripts-metapackage";
               paths = lib.filter (x: (lib.isDerivation x) && (x.name != "metapackage")) (
                 lib.attrValues nix-shell-scripts
               );
