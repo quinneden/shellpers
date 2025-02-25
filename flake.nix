@@ -14,6 +14,8 @@
       ...
     }:
     let
+      inherit (nixpkgs) lib;
+
       forEachSystem =
         f:
         nixpkgs.lib.genAttrs
@@ -35,23 +37,30 @@
     in
     {
       overlays = rec {
-        nix-shell-scripts = import ./overlay.nix;
-        default = nix-shell-scripts;
+        shellpers = import ./overlay.nix;
+        default = shellpers;
       };
 
       packages = forEachSystem (
         { pkgs }:
+        let
+          platform = lib.elemAt (lib.splitString "-" pkgs.system) 1;
+        in
         (pkgs.lib.packagesFromDirectoryRecursive {
           callPackage = pkgs.callPackage;
-          directory = ./scripts;
+          directory = ./scripts/common;
+        })
+        // (pkgs.lib.packagesFromDirectoryRecursive {
+          callPackage = pkgs.callPackage;
+          directory = ./scripts/${platform};
         })
         // {
           metapackage =
             with pkgs;
             buildEnv {
-              name = "nix-shell-scripts-metapackage";
+              name = "shellpers-metapackage";
               paths = lib.filter (x: (lib.isDerivation x) && (x.name != "metapackage")) (
-                lib.attrValues nix-shell-scripts
+                lib.attrValues shellpers
               );
             };
         }
