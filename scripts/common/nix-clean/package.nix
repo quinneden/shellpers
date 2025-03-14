@@ -11,53 +11,45 @@ let
     PATH=${binPath}:$PATH
 
     has_argument() {
-      [[ ($1 == *=* && -n ''${1#*=}) || ( -n "$2" && "$2" != -*)  ]];
+      [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
     }
 
     extract_argument() {
-      echo "''${2:-''${1#*=}}"
+      echo -n "''${2:-''${1#*=}}"
     }
 
     while [[ $? -gt 0 ]]; do
       case "$1" in
-        --keep-since)
+        --keep-since | -K)
           if ! has_argument "$@"; then
             echo "error: flag '--keep-since' requires 1 arg, but 0 were given" >&2
             exit 1
+          else
+            arg=$(extract_argument "$@")
           fi
 
-          KEEP_SINCE=$(extract_argument "$@")
+          flags+=("--keep-since" "''${arg%[Dd]d}")
           shift 2
           ;;
 
-        -k | --keep)
+        --keep | -k)
           if ! has_argument "$@"; then
             echo "error: flag '--keep-since' requires 1 arg, but 0 were given" >&2
             exit 1
+          else
+            arg=$(extract_argument "$@")
           fi
 
-          KEEP=$(extract_argument "$@")
+          flags+=$("--keep" "''${arg%[Dd]d}")
           shift 2
           ;;
 
         --dry)
-          DRY=true
+          flags+=("--dry")
           shift
           ;;
       esac
     done
-
-    if [[ -n $KEEP_SINCE ]]; then
-      flags+=( "--keep-since" "''${KEEP_SINCE%d}d")
-    fi
-
-    if [[ -n $KEEP && -z $KEEP_SINCE ]]; then
-      flags+=( "--keep" "$KEEP")
-    fi
-
-    if [[ $DRY == true ]]; then
-      flags+=("--dry")
-    fi
 
     nh clean all --ask "''${flags[@]}"
   '';

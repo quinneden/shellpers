@@ -18,7 +18,7 @@
 
       forEachSystem =
         f:
-        nixpkgs.lib.genAttrs
+        lib.genAttrs
           [
             "aarch64-darwin"
             "aarch64-linux"
@@ -30,7 +30,7 @@
                 inherit system;
                 overlays = [
                   self.overlays.default
-                ] ++ (nixpkgs.lib.optional (system == "aarch64-darwin") nh.overlays.default);
+                ] ++ (lib.optional (system == "aarch64-darwin") nh.overlays.default);
               };
             })
           );
