@@ -9,6 +9,9 @@ let
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
+    blue="\033[96m"
+    yellow="\033[93m"
+    reset="\033[0m"
 
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
@@ -16,6 +19,18 @@ let
 
     extract_argument() {
       echo -n "''${2:-''${1#*=}}"
+    }
+
+    get_size() {
+      diskutil list -plist virtual | plutil -convert json -o - - |
+      jq '
+        .AllDisksAndPartitions
+        | .[]
+        | select(.DeviceIdentifier == "disk3")
+        | .APFSVolumes[]
+        | select(.MountPoint == "/nix")
+        | .CapacityInUse
+      ' | numfmt --to si
     }
 
     while [[ $? -gt 0 ]]; do
@@ -51,7 +66,13 @@ let
       esac
     done
 
-    nh clean all --ask "''${flags[@]}"
+    (nh clean all "''${flags[@]}" &>/dev/null) &
+    pid=$!
+
+    while kill -0 "$pid" 2>/dev/null; do
+      current_size=$(get_size)
+      echo -ne "\r''${yellow}Nix Store Size:$reset ''${blue}$current_size$reset\r"
+    done
   '';
 in
 stdenv.mkDerivation rec {
