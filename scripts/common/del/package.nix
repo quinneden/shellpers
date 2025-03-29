@@ -16,11 +16,6 @@ let
     trash-cli
   ];
 
-  # trashEmpty = "trash-empty -f" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
-  # trashPut = "trash-put -f" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
-  # trashRestore = "trash-restore" + (optionalString stdenv.isDarwin " --trash-dir=$HOME/.Trash");
-  # trashDir = if stdenv.isDarwin then "$HOME/.Trash" else "$HOME/.local/share/trash";
-
   trashDir = "$HOME/.local/share/Trash";
   trashEmpty = "trash-empty -f";
   trashPut = "trash-put -f";
@@ -45,7 +40,7 @@ let
       if [[ -L $1 ]]; then
         abs_symlink=$(realpath -s $1)
         files+=("$abs_symlink")
-      elif [[ ! -L $1 && -e $1 ]]; then
+      elif [[ -e $1 ]]; then
         abs_path=$(realpath -q $1)
         files+=("$abs_path")
       else
@@ -96,7 +91,7 @@ let
 
     echo "Deleted:"
     for f in "''${files[@]}"; do
-      echo "    $(basename $f)"
+      echo "    $f"
     done
 
     if $EMPTY_NOW; then

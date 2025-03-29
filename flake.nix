@@ -3,16 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lix-module = {
+      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.92.0-3.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nh.url = "github:viperml/nh";
   };
 
   outputs =
-    {
-      nh,
-      nixpkgs,
-      self,
-      ...
-    }:
+    { nixpkgs, self, ... }@inputs:
     let
       inherit (nixpkgs) lib;
 
@@ -25,14 +28,15 @@
           ]
           (
             system:
-            f ({
+            f {
               pkgs = import nixpkgs {
                 inherit system;
                 overlays = [
+                  inputs.lix-module.overlays.default
                   self.overlays.default
-                ] ++ (lib.optional (system == "aarch64-darwin") nh.overlays.default);
+                ] ++ (lib.optional (system == "aarch64-darwin") inputs.nh.overlays.default);
               };
-            })
+            }
           );
     in
     {
