@@ -1,11 +1,15 @@
 {
+  coreutils,
   lib,
   nh,
   stdenv,
   writeShellScript,
 }:
 let
-  binPath = lib.makeBinPath [ nh ];
+  binPath = lib.makeBinPath [
+    nh
+    (lib.optionals stdenv.isLinux coreutils)
+  ];
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
@@ -21,16 +25,27 @@ let
       echo -n "''${2:-''${1#*=}}"
     }
 
-    get_size() {
-      diskutil list -plist virtual | plutil -convert json -o - - |
-      jq '
-        .AllDisksAndPartitions
-        | .[]
-        | select(.DeviceIdentifier == "disk3")
-        | .APFSVolumes[]
-        | select(.MountPoint == "/nix")
-        | .CapacityInUse
-      ' | numfmt --to si
+    ${
+      if stdenv.hostPlatform == "aarch64-linux" then
+        ''
+          get_size() {
+            diskutil list -plist virtual | plutil -convert json -o - - |
+            jq '
+              .AllDisksAndPartitions
+              | .[]
+              | select(.DeviceIdentifier == "disk3")
+              | .APFSVolumes[]
+              | select(.MountPoint == "/nix")
+              | .CapacityInUse
+            ' | numfmt --to si
+          }
+        ''
+      else
+        ''
+          get_size() {
+            df --output=used | tail -n1
+          }
+        ''
     }
 
     while [[ $? -gt 0 ]]; do
