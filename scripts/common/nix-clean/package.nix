@@ -8,17 +8,15 @@
 let
   binPath = lib.makeBinPath [
     nh
-    (lib.optionals stdenv.isLinux coreutils)
+    coreutils
   ];
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
-
-    blue="\033[96m"
-    yellow="\033[93m"
-    reset="\033[0m"
-
     optimise=false
+
+    GREEN='\033[32m'
+    RESET='\033[0m'
 
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
@@ -46,7 +44,7 @@ let
       else
         ''
           get_size() {
-            df --output=used | tail -n1
+            df -h --output=used /nix | tail -n1 | xargs
           }
         ''
     }
@@ -94,9 +92,11 @@ let
 
     while kill -0 "$pid" 2>/dev/null; do
       current_size=$(get_size)
-      echo -ne "''${yellow}Cleaning...''${reset}"
-      echo -ne "\r''${yellow}Nix Store Size:$reset ''${blue}$current_size$reset\r"
-    done
+      echo -ne "Cleaning.   (current size: $current_size)\r"; sleep 0.5
+      echo -ne "Cleaning..  (current size: $current_size)\r"; sleep 0.5
+      echo -ne "Cleaning... (current size: $current_size)\r"; sleep 0.7
+      echo -ne "Cleaning    (current size: $current_size)\r"; sleep 0.3
+    done && echo -e "\n''${GREEN}Done!''${RESET}"
 
     if $optimise; then
       nix store optimise
