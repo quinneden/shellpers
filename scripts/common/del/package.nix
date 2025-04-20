@@ -1,11 +1,11 @@
 {
   coreutils,
+  installShellFiles,
   lib,
   stdenv,
   trash-cli,
-  writeScript,
   writeShellScript,
-  installShellFiles,
+  writeText,
 }:
 
 with lib;
@@ -75,7 +75,7 @@ let
     for p in "''${PROTECT[@]}"; do
       for f in "''${files[@]}"; do
         if [[ $f =~ $p ]]; then
-          echo "error: cannot delete protected file or directory: $1"
+          echo "error: cannot delete protected file or directory: $f"
           files=("''${files[@]/$f}")
         fi
       done
@@ -129,7 +129,7 @@ let
     main "$@" && exit 0
   '';
 
-  undelCompletion = writeScript "_undel" ''
+  undelCompletion = writeText "_undel" ''
     #compdef undel udel
 
     _undel() {
@@ -137,9 +137,9 @@ let
     }
 
     if [ "$funcstack[1]" = "_undel" ]; then
-        _undel "$@"
+      _undel "$@"
     else
-        compdef _undel undel udel
+      compdef _undel undel udel
     fi
   '';
 in

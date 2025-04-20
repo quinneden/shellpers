@@ -13,9 +13,12 @@ let
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
+
     blue="\033[96m"
     yellow="\033[93m"
     reset="\033[0m"
+
+    optimise=false
 
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
@@ -78,6 +81,11 @@ let
           flags+=("--dry")
           shift
           ;;
+
+        -o | --optimise | --optimize)
+          optimise=true
+          shift
+          ;;
       esac
     done
 
@@ -86,8 +94,13 @@ let
 
     while kill -0 "$pid" 2>/dev/null; do
       current_size=$(get_size)
+      echo -ne "''${yellow}Cleaning...''${reset}"
       echo -ne "\r''${yellow}Nix Store Size:$reset ''${blue}$current_size$reset\r"
     done
+
+    if $optimise; then
+      nix store optimise
+    fi
   '';
 in
 stdenv.mkDerivation rec {
