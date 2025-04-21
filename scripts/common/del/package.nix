@@ -11,6 +11,8 @@
 with lib;
 
 let
+  inherit (import ../../../lib) colors;
+
   binPath = makeBinPath [
     coreutils
     trash-cli
@@ -44,7 +46,7 @@ let
         abs_path=$(realpath -q $1)
         files+=("$abs_path")
       else
-        echo "error: $1: path does not exist"
+        echo "${colors.BOLD}${colors.RED}error:${colors.RESET} $1: path does not exist"
       fi
     }
 
@@ -75,7 +77,7 @@ let
     for p in "''${PROTECT[@]}"; do
       for f in "''${files[@]}"; do
         if [[ $f =~ $p ]]; then
-          echo "error: cannot delete protected file or directory: $f"
+          echo "${colors.BOLD}${colors.RED}error:${colors.RESET} cannot delete protected file or directory: $f"
           files=("''${files[@]/$f}")
         fi
       done

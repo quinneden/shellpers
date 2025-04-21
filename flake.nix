@@ -92,7 +92,8 @@
                   cachix push quinneden < <(
                     ${lib.optionalString stdenv.isDarwin "nix build --show-trace \
                       --no-link --print-out-paths .#packages.aarch64-darwin.metapackage"}
-                    nix build --show-trace --no-link --print-out-paths .#packages.aarch64-linux.metapackage
+                    nix build --show-trace --no-link \
+                      --print-out-paths .#packages.aarch64-linux.metapackage
                   )
                 '';
               });

@@ -6,6 +6,8 @@
   writeShellScript,
 }:
 let
+  inherit (import ../../../lib) colors;
+
   binPath = lib.makeBinPath [
     nh
     coreutils
@@ -13,10 +15,6 @@ let
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
-    optimise=false
-
-    GREEN='\033[32m'
-    RESET='\033[0m'
 
     has_argument() {
       [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
@@ -96,9 +94,9 @@ let
       echo -ne "Cleaning..  (current size: $current_size)\r"; sleep 0.5
       echo -ne "Cleaning... (current size: $current_size)\r"; sleep 0.7
       echo -ne "Cleaning    (current size: $current_size)\r"; sleep 0.3
-    done && echo -e "\n''${GREEN}Done!''${RESET}"
+    done && echo -e "\n${colors.GREEN}Done!${colors.RESET}"
 
-    if $optimise; then
+    if ''${optimise:-false}; then
       nix store optimise
     fi
   '';

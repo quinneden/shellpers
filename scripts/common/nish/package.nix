@@ -1,55 +1,34 @@
 { stdenv, writeShellScript }:
 let
   script = writeShellScript "nish" ''
-    parse_args() {
-      if [[ $# -ge 1 ]]; then
-        if [[ $1 =~ -.$ ]]; then
-          for p in "''${@:2}"; do
-            pkgs+=("nixpkgs#$p")
-          done
-        else
-          if [[ $1 =~ ^.+#.+$ ]] || [[ $1 =~ ^github:.+$ ]]; then
-            pkgs="$1"
+    extra_args=()
+    pkgs=()
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --arg | --argstr)
+          extra_args+=("$1" "$2" "$3")
+          shift 3
+          ;;
+        --expr | -E | --command | -c)
+          extra_args+=("$1" "$2")
+          shift 2
+          ;;
+        -*)
+          extra_args+=("$1")
+          shift
+          ;;
+        *)
+          if [[ $1 =~ ^[[:alnum:].]+[:|#].+ ]]; then
+            pkgs+=("$1")
           else
-            for p in "''${@}"; do
-              pkgs+=("nixpkgs#$p")
-            done
+            pkgs+=("nixpkgs#$1")
           fi
-        fi
-        export pkgs
-      fi
-    }
+          shift
+          ;;
+      esac
+    done
 
-    nix_shell() {
-      if [[ $# -ge 1 ]]; then
-        case $1 in
-          -d)
-            nix develop -c zsh
-            return;;
-          -p)
-            nix-shell -p "''${@:2}" --run zsh
-            return;;
-          .)
-            nix shell;;
-          *)
-            nix shell "''${pkgs[@]}"
-        esac
-      else
-        if [[ -f ./flake.nix || -f ../flake.nix ]]; then
-          nix shell
-        else
-          nix shell nixpkgs#stdenv
-        fi
-      fi
-    }
-
-    nish_command() {
-      pkgs=()
-      parse_args "$@"
-      nix_shell "$@"
-    }
-
-    nish_command "$@"; exit
+    IN_NIX_SHELL=true name="nix-shell" nix shell ''${pkgs[@]} ''${extra_args[@]}
   '';
 in
 stdenv.mkDerivation rec {
