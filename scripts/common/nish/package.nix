@@ -1,4 +1,7 @@
-{ stdenv, writeShellScript }:
+{
+  stdenv,
+  writeShellScript,
+}:
 let
   script = writeShellScript "nish" ''
     extra_args=()

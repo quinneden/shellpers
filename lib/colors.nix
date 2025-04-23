@@ -2,6 +2,11 @@ let
   esc = builtins.fromJSON ''"\u001b"'';
 in
 {
+  BOLD = "${esc}[1m";
+  RESET = "${esc}[0m";
+  REVERSE = "${esc}[7m";
+  UNDERLINE = "${esc}[4m";
+
   BLACK = "${esc}[30m";
   RED = "${esc}[31m";
   GREEN = "${esc}[32m";
@@ -11,7 +16,6 @@ in
   CYAN = "${esc}[36m";
   WHITE = "${esc}[37m";
 
-  # Bright text colors
   BRIGHT_BLACK = "${esc}[90m";
   BRIGHT_RED = "${esc}[91m";
   BRIGHT_GREEN = "${esc}[92m";
@@ -21,7 +25,6 @@ in
   BRIGHT_CYAN = "${esc}[96m";
   BRIGHT_WHITE = "${esc}[97m";
 
-  # Background colors
   BG_BLACK = "${esc}[40m";
   BG_RED = "${esc}[41m";
   BG_GREEN = "${esc}[42m";
@@ -31,7 +34,6 @@ in
   BG_CYAN = "${esc}[46m";
   BG_WHITE = "${esc}[47m";
 
-  # Bright background colors
   BG_BRIGHT_BLACK = "${esc}[100m";
   BG_BRIGHT_RED = "${esc}[101m";
   BG_BRIGHT_GREEN = "${esc}[102m";
@@ -40,13 +42,4 @@ in
   BG_BRIGHT_MAGENTA = "${esc}[105m";
   BG_BRIGHT_CYAN = "${esc}[106m";
   BG_BRIGHT_WHITE = "${esc}[107m";
-
-  # Text formatting
-  BOLD = "${esc}[1m";
-  UNDERLINE = "${esc}[4m";
-  BLINK = "${esc}[5m";
-  REVERSE = "${esc}[7m";
-
-  # Reset all attributes
-  RESET = "${esc}[0m";
 }
