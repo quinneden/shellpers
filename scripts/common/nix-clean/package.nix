@@ -24,27 +24,8 @@ let
       echo -n "''${2:-''${1#*=}}"
     }
 
-    ${
-      if stdenv.hostPlatform == "aarch64-linux" then
-        ''
-          get_size() {
-            diskutil list -plist virtual | plutil -convert json -o - - |
-            jq '
-              .AllDisksAndPartitions
-              | .[]
-              | select(.DeviceIdentifier == "disk3")
-              | .APFSVolumes[]
-              | select(.MountPoint == "/nix")
-              | .CapacityInUse
-            ' | numfmt --to si
-          }
-        ''
-      else
-        ''
-          get_size() {
-            df -h --output=used /nix | tail -n1 | xargs
-          }
-        ''
+    get_size() {
+      df -Ph /nix | xargs | cut -f3 -d' '
     }
 
     while [[ $? -gt 0 ]]; do
