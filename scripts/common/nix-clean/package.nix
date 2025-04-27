@@ -24,8 +24,28 @@ let
       echo -n "''${2:-''${1#*=}}"
     }
 
-    get_size() {
-      df -Ph /nix | xargs | cut -f3 -d' '
+    ${
+      if stdenv.isDarwin then
+        ''
+          get_size() {
+            diskutil list -plist virtual |
+            plutil -convert json -o - - |
+            jq '
+              .AllDisksAndPartitions
+              | .[]
+              | select(.DeviceIdentifier == "disk3")
+              | .APFSVolumes[]
+              | select(.MountPoint == "/nix")
+              | .CapacityInUse
+            ' | numfmt --to iec-i
+          }
+        ''
+      else
+        ''
+          get_size() {
+            df -h --output=used /nix | tail -n1 | xargs
+          }
+        ''
     }
 
     while [[ $? -gt 0 ]]; do
