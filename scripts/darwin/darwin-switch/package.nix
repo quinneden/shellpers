@@ -18,24 +18,22 @@ let
         --help|-h)
           echo "Usage: darwin-switch [options]"
           echo "Options:"
-          echo "  -a, --ask       Ask for confirmation before switching"
-          echo "  -n, --dry       Dry run, do not actually switch"
-          echo "  -E, --edit      Edit the configuration file"
-          echo "  -f, --file      Specify the configuration file"
-          echo "  -h, --help      Display this help message"
-          echo "  -H, --hostname  Specify the hostname"
-          echo "  -o, --out-link  Specify the name of the output link"
-          echo "  -u, --update    Update the configuration file"
-          echo "  -U, --update-input Update the input file"
-          echo "  -v, --verbose   Enable verbose output"
-          echo "  -*, --*         Options passed to darwin-rebuild"
+          echo "  -a, --ask           Ask for confirmation before switching"
+          echo "  -h, --help          Display this help message"
+          echo "  -H, --hostname      Specify the hostname"
+          echo "  -n, --dry           Dry run, do not actually switch"
+          echo "  -N, --no-nom        Don't use nix-output-monitor"
+          echo "  -o, --out-link      Specify the name of the output link"
+          echo "  -u, --update        Update all the flake inputs"
+          echo "  -U, --update-input  Update a single flake input"
+          echo "  -v, --verbose       Enable verbose output"
           exit 0
           ;;
         -a | --ask | -n | --dry | --no-nom | -u | --update | -v | --verbose)
           nh_opts+=("$1")
           shift
           ;;
-        -E | -f | --file | -H | --hostname | -o | --out-link | -U | --update-input)
+        -H | --hostname | -o | --out-link | -U | --update-input)
           nh_opts+=("$1" "$2")
           shift 2
           ;;
