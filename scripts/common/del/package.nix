@@ -26,14 +26,6 @@ let
   del = writeShellScript "del" ''
     PATH="${binPath}:$PATH"; export PATH
 
-    ${optionalString stdenv.isDarwin ''
-      if ! [[ -L ${trashDir}/files ]]; then
-        rm -rf ${trashDir}
-        mkdir -p ${trashDir}
-        ln -s $HOME/.Trash ${trashDir}/files
-      fi
-    ''}
-
     files=()
     PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
     EMPTY_NOW=false
@@ -53,17 +45,25 @@ let
     show_help() {
       echo "Usage: del [OPTIONS] [FILES]"
       echo "Options:"
-      echo "  -e, --empty    Empty the trash immediately after trashing files"
+      echo "  -e, --empty    Empty the trash"
       echo "  -h, --help     Show this help message"
     }
 
+    ${optionalString stdenv.isDarwin ''
+      if ! [[ -L ${trashDir}/files ]]; then
+        rm -rf ${trashDir}
+        mkdir -p ${trashDir}
+        ln -s $HOME/.Trash ${trashDir}/files
+      fi
+    ''}
+
     while [[ $# -gt 0 ]]; do
       case "$1" in
-        -e|--empty)
-          EMPTY_NOW=true
+        -e | --empty)
+          EMPTY_TRASH=true
           shift
           ;;
-        -h|--help)
+        -h | --help)
           show_help
           exit 0
           ;;
@@ -87,19 +87,24 @@ let
       for f in "''${files[@]}"; do
         (${trashPut} "$f" || sudo ${trashPut} "$f") &>/dev/null
       done
-    else
-      exit 0
+
+      echo "Deleted:"
+      for f in "''${files[@]}"; do
+        echo "    $f"
+      done
     fi
 
-    echo "Deleted:"
-    for f in "''${files[@]}"; do
-      echo "    $f"
-    done
-
-    if $EMPTY_NOW; then
-      ((${trashEmpty} &>/dev/null) &)
-    else
-      ((sleep 300 && ${trashEmpty} &>/dev/null) &)
+    if $EMPTY_TRASH; then
+      echo "${colors.RED}Empty trash?${colors.RESET} (y/N): "
+      read -srN1 input
+      case "$input" in
+        [yY])
+          ${trashEmpty} && echo "Trash emptied!"
+          ;;
+        *)
+          exit 0
+          ;;
+      esac
     fi
   '';
 
