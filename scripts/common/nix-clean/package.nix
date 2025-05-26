@@ -86,7 +86,8 @@ let
       esac
     done
 
-    (nh clean all "''${flags[@]}" &>/dev/null) &
+    # export NH_NO_CHECKS=1
+    (nh clean all &>/dev/null) &
     pid=$!
 
     while kill -0 "$pid" 2>/dev/null; do
