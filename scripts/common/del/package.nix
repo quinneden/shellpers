@@ -28,7 +28,7 @@ let
 
     files=()
     PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
-    EMPTY_NOW=false
+    EMPTY_TRASH=false
 
     parse_arg() {
       if [[ -L $1 ]]; then
@@ -88,10 +88,8 @@ let
         (${trashPut} "$f" || sudo ${trashPut} "$f") &>/dev/null
       done
 
-      echo "Deleted:"
-      for f in "''${files[@]}"; do
-        echo "    $f"
-      done
+      printf "Deleted:\n"
+      printf "    %s\n" "''${files[@]}"
     fi
 
     if $EMPTY_TRASH; then
@@ -99,7 +97,7 @@ let
       read -srN1 input
       case "$input" in
         [yY])
-          ${trashEmpty} && echo "Trash emptied!"
+          sudo ${trashEmpty} && echo "Trash emptied!"
           ;;
         *)
           exit 0
