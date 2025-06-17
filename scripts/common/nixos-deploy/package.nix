@@ -1,7 +1,4 @@
-{
-  stdenv,
-  writeShellScript,
-}:
+{ stdenv, writeShellScript }:
 let
   script = writeShellScript "nixos-deploy" ''
     if [[ $# -eq 2 ]]; then

@@ -1,6 +1,7 @@
 {
   coreutils,
   lib,
+  jq,
   nh,
   stdenv,
   writeShellScript,
@@ -8,21 +9,15 @@
 let
   inherit (import ../../../lib) colors;
 
-  binPath = lib.makeBinPath [
-    nh
-    coreutils
-  ];
+  binPath = lib.makeBinPath (
+    [ nh ] ++ lib.optional stdenv.isDarwin jq ++ lib.optional stdenv.isLinux coreutils
+  );
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
 
-    has_argument() {
-      [[ ($1 == *=* && -n ''${1#*=}) || (-n "$2" && "$2" != -*)  ]];
-    }
-
-    extract_argument() {
-      echo -n "''${2:-''${1#*=}}"
-    }
+    flags=()
+    optimise=false
 
     ${
       if stdenv.isDarwin then
@@ -50,55 +45,30 @@ let
 
     while [[ $? -gt 0 ]]; do
       case "$1" in
-        --keep-since | -K)
-          if ! has_argument "$@"; then
-            echo "error: flag '--keep-since' requires 1 arg, but 0 were given" >&2
-            exit 1
-          else
-            arg=$(extract_argument "$@")
-          fi
-
-          flags+=("--keep-since" "''${arg%[Dd]d}")
-          shift 2
-          ;;
-
-        --keep | -k)
-          if ! has_argument "$@"; then
-            echo "error: flag '--keep-since' requires 1 arg, but 0 were given" >&2
-            exit 1
-          else
-            arg=$(extract_argument "$@")
-          fi
-
-          flags+=$("--keep" "''${arg%[Dd]d}")
-          shift 2
-          ;;
-
-        --dry)
-          flags+=("--dry")
-          shift
-          ;;
-
-        -o | --optimise | --optimize)
+        -O | --optimise | --optimize)
           optimise=true
           shift
           ;;
+        *)
+          flags+=("$1")
+          shift
       esac
     done
 
-    # export NH_NO_CHECKS=1
-    (nh clean all &>/dev/null) &
+    (nh clean all ''${flags[@]} &>/dev/null) &
     pid=$!
+
+    trap 'kill $pid' INT TERM
 
     while kill -0 "$pid" 2>/dev/null; do
       current_size=$(get_size)
-      echo -ne "Cleaning.   (current size: $current_size)\r"; sleep 0.5
-      echo -ne "Cleaning..  (current size: $current_size)\r"; sleep 0.5
-      echo -ne "Cleaning... (current size: $current_size)\r"; sleep 0.7
-      echo -ne "Cleaning    (current size: $current_size)\r"; sleep 0.3
+      echo -ne "Cleaning.   (current size: ${colors.YELLOW}$current_size${colors.RESET})\r"; sleep 0.5
+      echo -ne "Cleaning..  (current size: ${colors.YELLOW}$current_size${colors.RESET})\r"; sleep 0.5
+      echo -ne "Cleaning... (current size: ${colors.YELLOW}$current_size${colors.RESET})\r"; sleep 0.7
+      echo -ne "Cleaning    (current size: ${colors.YELLOW}$current_size${colors.RESET})\r"; sleep 0.3
     done && echo -e "\n${colors.GREEN}Done!${colors.RESET}"
 
-    if ''${optimise:-false}; then
+    if $optimise; then
       nix store optimise
     fi
   '';

@@ -27,8 +27,8 @@ let
     PATH="${binPath}:$PATH"; export PATH
 
     files=()
-    PROTECT=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
-    EMPTY_TRASH=false
+    protected_paths=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
+    empty_trash=false
 
     parse_arg() {
       if [[ -L $1 ]]; then
@@ -45,8 +45,8 @@ let
     show_help() {
       echo "Usage: del [OPTIONS] [FILES]"
       echo "Options:"
-      echo "  -e, --empty    Empty the trash"
-      echo "  -h, --help     Show this help message"
+      echo "    -e, --empty    Empty the trash"
+      echo "    -h, --help     Show this help message"
     }
 
     ${optionalString stdenv.isDarwin ''
@@ -60,7 +60,7 @@ let
     while [[ $# -gt 0 ]]; do
       case "$1" in
         -e | --empty)
-          EMPTY_TRASH=true
+          empty_trash=true
           shift
           ;;
         -h | --help)
@@ -74,7 +74,7 @@ let
       esac
     done
 
-    for p in "''${PROTECT[@]}"; do
+    for p in "''${protected_paths[@]}"; do
       for f in "''${files[@]}"; do
         if [[ $f =~ $p ]]; then
           echo "${colors.BOLD}${colors.RED}error:${colors.RESET} cannot delete protected file or directory: $f"
@@ -92,7 +92,7 @@ let
       printf "    %s\n" "''${files[@]}"
     fi
 
-    if $EMPTY_TRASH; then
+    if $empty_trash; then
       echo "${colors.RED}Empty trash?${colors.RESET} (y/N): "
       read -srN1 input
       case "$input" in

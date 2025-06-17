@@ -1,7 +1,4 @@
-{
-  stdenv,
-  writeShellScript,
-}:
+{ stdenv, writeShellScript }:
 let
   copyToPb = if stdenv.isDarwin then "pbcopy" else "wl-copy";
 

@@ -1,7 +1,4 @@
-{
-  stdenv,
-  writeShellScript,
-}:
+{ stdenv, writeShellScript }:
 let
   script = writeShellScript "nish" ''
     # Pre-allocate arrays for better performance

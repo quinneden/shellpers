@@ -2,7 +2,7 @@
   description = "Derivations for various shell scripts I use.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,23 +21,18 @@
 
       forEachSystem =
         f:
-        lib.genAttrs
-          [
-            "aarch64-darwin"
-            "aarch64-linux"
-          ]
-          (
-            system:
-            f {
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [
-                  # inputs.lix-module.overlays.default
-                  self.overlays.default
-                ] ++ (lib.optional (system == "aarch64-darwin") inputs.nh.overlays.default);
-              };
-            }
-          );
+        lib.genAttrs [ "aarch64-darwin" "aarch64-linux" ] (
+          system:
+          f {
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [
+                # inputs.lix-module.overlays.default
+                self.overlays.default
+              ] ++ (lib.optional (system == "aarch64-darwin") inputs.nh.overlays.default);
+            };
+          }
+        );
     in
     {
       overlays = rec {
@@ -77,11 +72,7 @@
 
           cacheout =
             let
-              inherit (pkgs)
-                writeShellApplication
-                lib
-                stdenv
-                ;
+              inherit (pkgs) writeShellApplication lib stdenv;
             in
             {
               type = "app";

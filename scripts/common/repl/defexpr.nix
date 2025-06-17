@@ -18,9 +18,7 @@ rec {
       modules ? [ { system.stateVersion = 6; } ],
       system ? "aarch64-darwin",
     }:
-    nix-darwin.lib.darwinSystem {
-      inherit modules system;
-    };
+    nix-darwin.lib.darwinSystem { inherit modules system; };
 
   darwinOptions = (mkDarwinSystem { }).options;
   nixosOptions = (mkNixosSystem { }).options;
