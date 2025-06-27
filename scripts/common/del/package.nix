@@ -27,7 +27,7 @@ let
     PATH="${binPath}:$PATH"; export PATH
 
     files=()
-    protected_paths=($HOME/.dotfiles$ $HOME/workdir$ $HOME/repos$ $HOME/.config$)
+    protected_paths=($HOME/.dotfiles$ $HOME/Workdir$ $HOME/Repositories$ $HOME/.config$)
     empty_trash=false
 
     parse_arg() {

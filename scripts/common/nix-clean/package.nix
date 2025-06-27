@@ -9,9 +9,9 @@
 let
   inherit (import ../../../lib) colors;
 
-  binPath = lib.makeBinPath (
-    [ nh ] ++ lib.optional stdenv.isDarwin jq ++ lib.optional stdenv.isLinux coreutils
-  );
+  binPath =
+    with lib;
+    makeBinPath ([ nh ] ++ optional stdenv.isDarwin jq ++ optional stdenv.isLinux coreutils);
 
   script = writeShellScript "nix-clean" ''
     PATH=${binPath}:$PATH
@@ -43,8 +43,12 @@ let
         ''
     }
 
-    while [[ $? -gt 0 ]]; do
+    while [[ $# -gt 0 ]]; do
       case "$1" in
+        -u | --used)
+          echo -e "Nix store size: ${colors.YELLOW}$(get_size)${colors.RESET}"
+          exit 0
+          ;;
         -O | --optimise | --optimize)
           optimise=true
           shift

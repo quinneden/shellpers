@@ -27,9 +27,9 @@
             pkgs = import nixpkgs {
               inherit system;
               overlays = [
-                # inputs.lix-module.overlays.default
                 self.overlays.default
-              ] ++ (lib.optional (system == "aarch64-darwin") inputs.nh.overlays.default);
+                inputs.nh.overlays.default
+              ];
             };
           }
         );
