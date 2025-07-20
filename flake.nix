@@ -58,25 +58,23 @@
         rec {
           default = cacheout;
 
-          cacheout =
-            let
-              inherit (pkgs) writeShellApplication lib stdenv;
-            in
-            {
-              type = "app";
-              program = lib.getExe (writeShellApplication {
+          cacheout = {
+            type = "app";
+            program = lib.getExe (
+              pkgs.writeShellApplication {
                 name = "cacheout";
                 runtimeInputs = [ pkgs.cachix ];
                 text = ''
                   cachix push quinneden < <(
-                    ${lib.optionalString stdenv.isDarwin ''
+                    ${lib.optionalString pkgs.stdenv.isDarwin ''
                       nix build --show-trace --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
                     ''}
                     nix build --show-trace --no-link --print-out-paths .#packages.aarch64-linux.metapackage
                   )
                 '';
-              });
-            };
+              }
+            );
+          };
         }
       );
 
