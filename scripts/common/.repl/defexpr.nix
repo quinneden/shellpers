@@ -1,17 +1,16 @@
 rec {
   nix-darwin = builtins.getFlake "flake:nix-darwin";
-  nixpkgs = builtins.getFlake "flake:nixpkgs";
   home-manager = builtins.getFlake "flake:home-manager";
 
-  pkgs = import nixpkgs { };
-  lib = nixpkgs.lib;
+  pkgs = import <nixpkgs> { };
+  lib = import <nixpkgs/lib>;
 
   mkNixosSystem =
     {
       modules ? [ { system.stateVersion = lib.versions.majorMinor lib.version; } ],
       system ? "aarch64-linux",
     }:
-    nixpkgs.lib.nixosSystem { inherit modules system; };
+    lib.nixosSystem { inherit modules system; };
 
   mkDarwinSystem =
     {

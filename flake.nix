@@ -1,21 +1,12 @@
 {
-  description = "Derivations for various shell scripts I use.";
+  description = "Derivations for various shell scripts I use";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    lix-module = {
-      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.93.0.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nh.url = "github:viperml/nh";
   };
 
   outputs =
-    { nixpkgs, self, ... }@inputs:
+    { nixpkgs, self }:
     let
       inherit (nixpkgs) lib;
 
@@ -26,10 +17,7 @@
           f {
             pkgs = import nixpkgs {
               inherit system;
-              overlays = [
-                self.overlays.default
-                inputs.nh.overlays.default
-              ];
+              overlays = [ self.overlays.default ];
             };
           }
         );
