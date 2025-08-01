@@ -1,53 +1,41 @@
-{ stdenv, writeShellScript }:
-let
-  script = writeShellScript "lsh" ''
-    lima_json=$(limactl list --json | jq -r '{name: .name, status: .status}')
+{ writeShellScriptBin }:
 
-    parse_args() {
-      if [[ $# -eq 0 ]]; then
-        instance="default"
-      else
-        if [[ $1 == '-s' ]]; then
-          shift; STOP=1
-        fi
-        instance="$1"
+writeShellScriptBin "lsh" ''
+  lima_json=$(limactl list --json | jq -r '{name: .name, status: .status}')
+
+  parse_args() {
+    if [[ $# -eq 0 ]]; then
+      instance="default"
+    else
+      if [[ $1 == '-s' ]]; then
+        shift; STOP=1
       fi
-    }
+      instance="$1"
+    fi
+  }
 
-    stop_instance() {
-      if [[ $STOP -eq 1 ]]; then
-        if jq -re --arg instance "$instance" 'select(.name == $instance)' <<<$lima_json &>/dev/null; then
-          limactl stop "$instance" && exit 0
-        fi
-      fi
-    }
-
-    lima_shell() {
+  stop_instance() {
+    if [[ $STOP -eq 1 ]]; then
       if jq -re --arg instance "$instance" 'select(.name == $instance)' <<<$lima_json &>/dev/null; then
-        if [[ $(jq -r --arg instance "$instance" 'select(.name == $instance) | .status' <<<$lima_json) == 'Stopped' ]]; then
-          limactl start $instance || return 1
-        fi
-        limactl shell $instance
+        limactl stop "$instance" && exit 0
       fi
-    }
+    fi
+  }
 
-    main() {
-      parse_args "$@"
-      stop_instance
-      lima_shell
-    }
+  lima_shell() {
+    if jq -re --arg instance "$instance" 'select(.name == $instance)' <<<$lima_json &>/dev/null; then
+      if [[ $(jq -r --arg instance "$instance" 'select(.name == $instance) | .status' <<<$lima_json) == 'Stopped' ]]; then
+        limactl start $instance || return 1
+      fi
+      limactl shell $instance
+    fi
+  }
 
-    main "$@" || exit 1
-  '';
-in
-stdenv.mkDerivation rec {
-  name = "lsh";
-  src = ./.;
+  main() {
+    parse_args "$@"
+    stop_instance
+    lima_shell
+  }
 
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/bin
-    install -m 755 ${script} $out/bin/${name}
-    runHook postInstall
-  '';
-}
+  main "$@" || exit 1
+''

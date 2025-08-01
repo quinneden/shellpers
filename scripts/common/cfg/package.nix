@@ -8,6 +8,7 @@
   writeShellScript,
   writeText,
 }:
+
 let
   binPath = lib.makeBinPath [
     gawk
@@ -181,6 +182,7 @@ let
     compdef _cfg cfg
   '';
 in
+
 stdenv.mkDerivation rec {
   name = "cfg";
   src = ./.;
