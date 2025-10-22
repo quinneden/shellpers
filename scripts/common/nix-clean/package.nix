@@ -51,7 +51,6 @@ writeShellScriptBin "nix-clean" ''
     echo "  -K, --keep-since KEEP_SINCE    Specify time range in which past gcroots and generations will be kept" >&2
     echo "  -O, --optimize                 Optimize the Nix store after cleaning" >&2
     echo "  -u, --used                     Show the current size of the Nix store and exit" >&2
-    echo "  -v, --verbose                  Show debug logs" >&2
   }
 
   nh_clean_in_background() {
@@ -86,7 +85,7 @@ writeShellScriptBin "nix-clean" ''
   }
 
   show_diff() {
-    local current_bytes bytes_diff
+    local current_bytes bytes_diff pct
     current_bytes=$(get_size_bytes)
     bytes_diff=$((initial_bytes - current_bytes))
     pct="$(get_percentage "$bytes_diff" "$initial_bytes")%"
@@ -103,7 +102,7 @@ writeShellScriptBin "nix-clean" ''
   }
 
   watch_clean_until_done() {
-    clear="\e[0K"
+    local clear="\e[0K"
     while kill -0 "$nh_pid" 2>/dev/null; do
       echo -ne "''${clear}Cleaning.    [ ${colors.YELLOW}$(show_diff) removed${colors.RESET} ]\r"; sleep 0.5
       echo -ne "''${clear}Cleaning..   [ ${colors.YELLOW}$(show_diff) removed${colors.RESET} ]\r"; sleep 0.5
@@ -113,38 +112,24 @@ writeShellScriptBin "nix-clean" ''
     echo -ne "\r''${clear}"
   }
 
+  arg_maybe() {
+    local _arg="''${1:-}"
+    [[ -z $_arg || $_arg == -* ]] && return 0
+    echo $arg && shift
+  }
+
   while [[ $# -gt 0 ]]; do
-    case "$1" in
+    arg=$1; shift
+    case "$arg" in
       -h | --help)
-        show_help
-        exit 0
-        ;;
-      -k | --keep)
-        if [[ -z $2 || $2 == -* ]]; then
-          echo "${colors.RED}Error: option requires 1 argument, but 0 were given${colors.RESET}" >&2
-          exit 1
-        fi
-        flags+=("--keep" "$2")
-        shift 2
-        ;;
-      -K | --keep-since)
-        if [[ -z $2 || $2 == -* ]]; then
-          echo "${colors.RED}Error: option requires 1 argument, but 0 were given${colors.RESET}" >&2
-          exit 1
-        fi
-        flags+=("--keep-since" "$2")
-        shift 2
+        show_help && exit 0
         ;;
       -u | --used)
         echo -e "Nix store size: ${colors.YELLOW}$(get_size_bytes | to_gib)${colors.RESET}"
         exit 0
         ;;
-      -O | --optimize | --optimise)
-        optimize=true
-        shift
-        ;;
-      -v | --verbose)
-        flags+=("--verbose")
+      -*)
+        flags+=("$arg" $(arg_maybe $1))
         shift
         ;;
       *)
