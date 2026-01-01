@@ -3,10 +3,15 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nh.url = "github:viperml/nh";
   };
 
   outputs =
-    { nixpkgs, self }:
+    {
+      nh,
+      nixpkgs,
+      self,
+    }:
     let
       inherit (nixpkgs) lib;
 
@@ -17,7 +22,10 @@
           f {
             pkgs = import nixpkgs {
               inherit system;
-              overlays = [ self.overlays.default ];
+              overlays = [
+                nh.overlays.default
+                self.overlays.default
+              ];
             };
           }
         );
@@ -31,7 +39,7 @@
       packages = forEachSystem (
         { pkgs }:
         let
-          platform = lib.elemAt (lib.splitString "-" pkgs.system) 1;
+          platform = lib.elemAt (lib.splitString "-" pkgs.stdenv.hostPlatform.system) 1;
         in
         (pkgs.lib.packagesFromDirectoryRecursive {
           callPackage = pkgs.callPackage;

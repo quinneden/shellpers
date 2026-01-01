@@ -1,7 +1,7 @@
 {
   coreutils,
-  lib,
   jq,
+  lib,
   nh,
   stdenv,
   writeShellScriptBin,
@@ -19,7 +19,6 @@ in
 writeShellScriptBin "nix-clean" ''
   PATH=${binPath}:$PATH
 
-  flags=()
   optimize=false
 
   ${
@@ -49,12 +48,12 @@ writeShellScriptBin "nix-clean" ''
     echo "  -h, --help                     Show this help message" >&2
     echo "  -k, --keep KEEP                Specify number of past generations to keep" >&2
     echo "  -K, --keep-since KEEP_SINCE    Specify time range in which past gcroots and generations will be kept" >&2
-    echo "  -O, --optimize                 Optimize the Nix store after cleaning" >&2
+    echo "  -o, --optimize                 Optimize the Nix store after cleaning" >&2
     echo "  -u, --used                     Show the current size of the Nix store and exit" >&2
   }
 
   nh_clean_in_background() {
-    nh clean all "$@" &>/dev/null &
+    nh clean all &>/dev/null &
     nh_pid=$!
     trap "sudo kill $nh_pid &>/dev/null" INT TERM EXIT
   }
@@ -128,8 +127,8 @@ writeShellScriptBin "nix-clean" ''
         echo -e "Nix store size: ${colors.YELLOW}$(get_size_bytes | to_gib)${colors.RESET}"
         exit 0
         ;;
-      -*)
-        flags+=("$arg" $(arg_maybe $1))
+      -o | --optimize | --optimise)
+        optimize=true
         shift
         ;;
       *)
@@ -141,7 +140,7 @@ writeShellScriptBin "nix-clean" ''
   done
 
   initial_bytes=$(get_size_bytes)
-  nh_clean_in_background "''${flags[@]}"
+  nh_clean_in_background
 
   if watch_clean_until_done; then
     echo -e "${colors.GREEN}Finished cleaning Nix store${colors.RESET}"
