@@ -19,25 +19,25 @@
         f:
         lib.genAttrs [ "aarch64-darwin" "aarch64-linux" ] (
           system:
-          f {
-            pkgs = import nixpkgs {
+          f (
+            import nixpkgs {
               inherit system;
               overlays = [
                 nh.overlays.default
                 self.overlays.default
               ];
-            };
-          }
+            }
+          )
         );
     in
     {
-      overlays = rec {
+      overlays = {
+        default = self.overlays.shellpers;
         shellpers = import ./overlay.nix;
-        default = shellpers;
       };
 
       packages = forEachSystem (
-        { pkgs }:
+        pkgs:
         let
           platform = lib.elemAt (lib.splitString "-" pkgs.stdenv.hostPlatform.system) 1;
         in
@@ -61,32 +61,31 @@
         }
       );
 
-      apps = forEachSystem (
-        { pkgs }:
-        rec {
-          default = cacheout;
+      apps = forEachSystem (pkgs: {
+        default = self.packages.${pkgs.stdenv.hostPlatform.system}.cacheout;
 
-          cacheout = {
-            type = "app";
-            program = lib.getExe (
-              pkgs.writeShellApplication {
-                name = "cacheout";
-                runtimeInputs = [ pkgs.cachix ];
-                text = ''
-                  cachix push quinneden < <(
-                    ${lib.optionalString pkgs.stdenv.isDarwin ''
-                      nix build --show-trace --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
-                    ''}
-                    nix build --show-trace --no-link --print-out-paths .#packages.aarch64-linux.metapackage
-                  )
-                '';
-              }
-            );
-          };
-        }
+        cacheout = {
+          type = "app";
+          program = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "cacheout";
+              runtimeInputs = [ pkgs.cachix ];
+              text = ''
+                cachix push quinneden < <(
+                  ${lib.optionalString pkgs.stdenv.isDarwin ''
+                    nix build --show-trace --no-link --print-out-paths .#packages.aarch64-darwin.metapackage
+                  ''}
+                  nix build --show-trace --no-link --print-out-paths .#packages.aarch64-linux.metapackage
+                )
+              '';
+            }
+          );
+        };
+      });
+
+      formatter = forEachSystem (
+        pkgs: pkgs.nixfmt-tree.override { settings.formatter.nixfmt.options = [ "--strict" ]; }
       );
-
-      formatter = forEachSystem ({ pkgs }: pkgs.nixfmt-rfc-style);
     };
 
   nixConfig = {
