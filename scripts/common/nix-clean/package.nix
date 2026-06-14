@@ -53,7 +53,7 @@ writeShellScriptBin "nix-clean" ''
   }
 
   nh_clean_in_background() {
-    nh clean all &>/dev/null &
+    nh clean all --no-gcroots &>/dev/null &
     nh_pid=$!
     trap "sudo kill $nh_pid &>/dev/null" INT TERM EXIT
   }
